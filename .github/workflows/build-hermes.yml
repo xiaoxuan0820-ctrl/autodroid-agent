@@ -19,6 +19,12 @@ jobs:
           repository: rfdiosuao/Hermes-Agent-phone
           path: hermes-android
 
+      - name: Fix icon reference in manifest (drawable → mipmap)
+        run: |
+          sed -i 's|@drawable/ic_launcher|@mipmap/ic_launcher|g' \
+            hermes-android/app/src/main/AndroidManifest.xml
+          echo "✅ Manifest icon reference fixed"
+
       - name: Apply DeepSeek thinking mode patch
         run: |
           cp "${{ github.workspace }}/patches/hermes-agent/src/main/java/com/apk/claw/android/agent/langchain/http/OkHttpClientBuilderAdapter.java" \

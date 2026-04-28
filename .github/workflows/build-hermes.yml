@@ -25,6 +25,18 @@ jobs:
             hermes-android/app/src/main/AndroidManifest.xml
           echo "✅ Manifest icon reference fixed"
 
+      - name: Apply AgentConfig patch (phone-master 系统提示词)
+        run: |
+          cp "${{ github.workspace }}/patches/hermes-agent/src/main/java/com/apk/claw/android/agent/AgentConfig.kt" \
+            hermes-android/app/src/main/java/com/apk/claw/android/agent/AgentConfig.kt
+          echo "✅ AgentConfig (phone-master system prompt) patch applied"
+
+      - name: Apply DefaultAgentService patch (auto-learning)
+        run: |
+          cp "${{ github.workspace }}/patches/hermes-agent/src/main/java/com/apk/claw/android/agent/DefaultAgentService.kt" \
+            hermes-android/app/src/main/java/com/apk/claw/android/agent/DefaultAgentService.kt
+          echo "✅ DefaultAgentService (auto-learning) patch applied"
+
       - name: Apply DeepSeek thinking mode patch
         run: |
           cp "${{ github.workspace }}/patches/hermes-agent/src/main/java/com/apk/claw/android/agent/langchain/http/OkHttpClientBuilderAdapter.java" \

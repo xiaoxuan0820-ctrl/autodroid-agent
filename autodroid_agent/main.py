@@ -6,7 +6,7 @@ AegisPhone 🔱 启动入口
 import sys
 import threading
 
-from autodroid_agent.config import FEISHU_WEBHOOK_PORT, EXECUTOR_BACKEND
+from autodroid_agent.config import FEISHU_WEBHOOK_PORT, EXECUTOR_BACKEND, LLM_MODEL
 from autodroid_agent.router import route_cli
 from autodroid_agent.agent import parse_actions
 from autodroid_agent.executor import execute_actions
@@ -56,7 +56,7 @@ def run_cli():
     print("🔱 AegisPhone CLI")
     print("=" * 50)
     print(f"   后端: {get_backend_name()}")
-    print(f"   模型: {__import__('autodroid_agent.config').LLM_MODEL}")
+    print(f"   模型: {LLM_MODEL}")
     print(f"   输入指令控制手机，输入 'exit' 退出")
     print()
 

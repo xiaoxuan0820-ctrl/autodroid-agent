@@ -39,7 +39,24 @@ def _handle_text_message(text: str, sender_id: str) -> dict:
         from autodroid_agent.executor_hermes import execute_agent_task, check_health
         if not check_health():
             return {"success": False, "error": "Hermes APK 不可用，请确认手机已连接"}
-        return execute_agent_task(text)
+        raw = execute_agent_task(text)
+        # 转换 Hermes 响应格式为 _build_reply 兼容格式
+        if raw.get("success") and raw.get("data"):
+            try:
+                import json
+                inner = json.loads(raw["data"]) if isinstance(raw["data"], str) else raw["data"]
+                answer = inner.get("answer", "")
+                rounds = inner.get("rounds", 0)
+                return {
+                    "success": True,
+                    "steps_executed": rounds,
+                    "total_steps": rounds,
+                    "logs": [f"🤖 Hermes: {answer}"],
+                    "error": inner.get("error") or None,
+                }
+            except (json.JSONDecodeError, TypeError):
+                pass
+        return raw
 
     # ADB 后端：LLM 解析 + 本地逐条执行
     try:

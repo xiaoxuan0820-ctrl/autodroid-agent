@@ -55,47 +55,17 @@ jobs:
           }
           PATCH
 
-      - name: 🔱 Create AegisPhone icon generator
+      - name: 🔱 AegisPhone 品牌重塑（名字+图标）
+        working-directory: hermes-android
         run: |
-          cat > /tmp/gen_icon.py << 'PYEOF'
-import struct, zlib, os
-
-def make_png(w, h, r, g, b):
-    def chunk(t, d):
-        c = t + d
-        return struct.pack('>I',len(d)) + c + struct.pack('>I',zlib.crc32(c)&0xffffffff)
-    hdr = b'\x89PNG\r\n\x1a\n'
-    ihdr = chunk(b'IHDR', struct.pack('>IIBBBBB', w, h, 8, 2, 0, 0, 0))
-    raw = b''
-    cx, cy = w//2, h//2
-    for y in range(h):
-        raw += b'\x00'
-        for x in range(w):
-            d = ((x-cx)**2 + (y-cy)**2)**0.5 / cx
-            if d < 0.85: raw += struct.pack('BBB', 255, 200, 50)
-            elif d < 0.95:
-                t = (d - 0.85) / 0.1
-                raw += struct.pack('BBB', int(255-(255-180)*t), int(200-(200-80)*t), 50)
-            else: raw += struct.pack('BBB', r, g, b)
-    return hdr + ihdr + chunk(b'IDAT', zlib.compress(raw)) + chunk(b'IEND', b'')
-
-icons = {'mdpi':48, 'hdpi':72, 'xhdpi':96, 'xxhdpi':144, 'xxxhdpi':192}
-for dpi, size in icons.items():
-    d = f'app/src/main/res/mipmap-{dpi}'
-    os.makedirs(d, exist_ok=True)
-    with open(f'{d}/ic_launcher.png', 'wb') as f: f.write(make_png(size, size, 20, 20, 50))
-    print(f'  {d} ({size}x{size})')
-
-os.makedirs('app/src/main/res/drawable', exist_ok=True)
-os.makedirs('app/src/main/res/mipmap-anydpi-v26', exist_ok=True)
-with open('app/src/main/res/drawable/ic_launcher_background.xml', 'w') as f:
-    f.write('<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108"><path android:fillColor="#141432" android:pathData="M0,0h108v108h-108z"/></vector>\n')
-with open('app/src/main/res/drawable/ic_launcher_foreground.xml', 'w') as f:
-    f.write('<vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108"><path android:fillColor="#FFC832" android:pathData="M54,18A36,36 0,1 1,54,90A36,36 0,1 1,54,18Z"/><path android:fillColor="#141432" android:pathData="M54,32L40,68h28L54,32ZM50,58l4,-14l4,14h-8Z"/><path android:fillColor="#141432" android:pathData="M50,68h8v4h-8z"/></vector>\n')
-with open('app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml', 'w') as f:
-    f.write('<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android"><background android:drawable="@drawable/ic_launcher_background"/><foreground android:drawable="@drawable/ic_launcher_foreground"/></adaptive-icon>\n')
-print('Icons generated')
-PYEOF
+          set -e
+          echo "📝 修改 App 名称..."
+          find app/src/main/res -name "strings.xml" -exec sed -i 's/ApkClaw/AegisPhone/g; s/apk_claw/aegis_phone/g' {} +
+          echo "🔄 替换项目中所有 ApkClaw 引用..."
+          find . -type f \( -name "*.xml" -o -name "*.kt" -o -name "*.java" -o -name "*.kts" \) \
+            -exec sed -i 's/ApkClaw/AegisPhone/g; s/apk_claw/aegis_phone/g' {} + 2>/dev/null || true
+          echo "🎨 生成 AegisPhone 图标..."
+          python3 "${{ github.workspace }}/scripts/generate_icons.py"
 
       - name: 🔱 AegisPhone 品牌重塑（名字+图标）
         working-directory: hermes-android

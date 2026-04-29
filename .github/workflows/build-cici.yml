@@ -167,15 +167,16 @@ jobs:
           if [ $EXIT_CODE -ne 0 ]; then
             echo "### KOTLIN COMPILATION FAILED" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            grep -n "error:" /tmp/kotlin_output.txt | head -30 >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
+            grep -n "^e:" /tmp/kotlin_output.txt | head -50 >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
+            grep -n "error:" /tmp/kotlin_output.txt | head -20 >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
             grep -n "unresolved reference" /tmp/kotlin_output.txt | head -20 >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
             echo '```' >> $GITHUB_STEP_SUMMARY
-            echo "=== LAST 50 LINES ===" >> $GITHUB_STEP_SUMMARY
+            echo "=== LAST 100 LINES ===" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            tail -50 /tmp/kotlin_output.txt >> $GITHUB_STEP_SUMMARY
+            tail -100 /tmp/kotlin_output.txt >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            echo "=== COMPILATION ERRORS ==="
-            grep -n "error:" /tmp/kotlin_output.txt | head -30
+            echo "=== KOTLIN ERRORS (e:) ==="
+            grep -n "^e:" /tmp/kotlin_output.txt | head -30
             exit 1
           fi
           echo "=== Kotlin compilation OK ==="

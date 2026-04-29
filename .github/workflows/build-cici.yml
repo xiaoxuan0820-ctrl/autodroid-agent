@@ -136,15 +136,7 @@ jobs:
           echo "KEY_ALIAS=androiddebugkey" >> local.properties
           echo "KEY_PASSWORD=android" >> local.properties
 
-          # 添加仓库备选
-          cat >> settings.gradle.kts << 'PATCH'
-          dependencyResolutionManagement {
-              repositories {
-                  mavenCentral()
-                  google()
-              }
-          }
-          PATCH
+          # local.properties 已有 keystore 配置
 
       - name: CiCi 品牌重塑（名字+图标）
         working-directory: hermes-android
@@ -167,7 +159,11 @@ jobs:
           if [ $EXIT_CODE -ne 0 ]; then
             echo "### KOTLIN COMPILATION FAILED" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            grep -n "^e:" /tmp/kotlin_output.txt | head -50 >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
+            grep "^e:" /tmp/kotlin_output.txt | head -50 | while IFS= read -r line; do
+              err_clean=$(echo "$line" | sed 's/"/\"/g')
+              echo "::error::$err_clean"
+              echo "$line" >> $GITHUB_STEP_SUMMARY
+            done
             grep -n "error:" /tmp/kotlin_output.txt | head -20 >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
             grep -n "unresolved reference" /tmp/kotlin_output.txt | head -20 >> $GITHUB_STEP_SUMMARY 2>/dev/null || true
             echo '```' >> $GITHUB_STEP_SUMMARY
@@ -176,7 +172,7 @@ jobs:
             tail -100 /tmp/kotlin_output.txt >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
             echo "=== KOTLIN ERRORS (e:) ==="
-            grep -n "^e:" /tmp/kotlin_output.txt | head -30
+            grep "^e:" /tmp/kotlin_output.txt | head -30
             exit 1
           fi
           echo "=== Kotlin compilation OK ==="

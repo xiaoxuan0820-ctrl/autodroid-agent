@@ -162,10 +162,22 @@ jobs:
         working-directory: hermes-android
         run: |
           echo "=== Running Kotlin compilation ==="
+          # 保存完整日志并用 Python 生成 GitHub annotations
           ./gradlew :app:compileDebugKotlin --no-daemon -Dorg.gradle.jvmargs=-Xmx4g 2>&1 | tee /tmp/kotlin_output.txt
-          if [ ${PIPESTATUS[0]} -ne 0 ]; then
+          EXIT_CODE=${PIPESTATUS[0]}
+          if [ $EXIT_CODE -ne 0 ]; then
+            echo "=== KOTLIN COMPILATION FAILED (exit=$EXIT_CODE) ===" >> $GITHUB_STEP_SUMMARY
+            # 提取 error 行写入 step summary
+            grep -i "error:" /tmp/kotlin_output.txt | head -50 >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "=== Full output (last 80 lines) ===" >> $GITHUB_STEP_SUMMARY
+            tail -80 /tmp/kotlin_output.txt >> $GITHUB_STEP_SUMMARY
+            # 同时也输出到日志方便查看
             echo "=== KOTLIN COMPILATION FAILED ==="
             grep -i "error:" /tmp/kotlin_output.txt | head -50
+            echo ""
+            echo "=== Last 10 lines of output ==="
+            tail -10 /tmp/kotlin_output.txt
             exit 1
           fi
           echo "=== Kotlin compilation OK ==="

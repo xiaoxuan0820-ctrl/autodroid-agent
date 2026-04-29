@@ -154,18 +154,19 @@ jobs:
         working-directory: hermes-android
         run: |
           echo "=== Running Kotlin compilation ==="
-          ./gradlew :app:compileDebugKotlin --no-daemon -Dorg.gradle.jvmargs=-Xmx4g > /tmp/kotlin_output.txt 2>&1
-          EXIT_CODE=$?
+          ./gradlew :app:compileDebugKotlin --no-daemon -Dorg.gradle.jvmargs=-Xmx4g 2>&1 | tee /tmp/kotlin_output.txt
+          EXIT_CODE=${PIPESTATUS[0]}
           if [ $EXIT_CODE -ne 0 ]; then
-            echo "### KOTLIN COMPILATION FAILED" >> $GITHUB_STEP_SUMMARY
+            echo "=== ERROR: compilation failed ==="
+            wc -c /tmp/kotlin_output.txt
+            echo "=== HEAD ==="
+            head -30 /tmp/kotlin_output.txt
+            echo "=== TAIL 30 ==="
+            tail -30 /tmp/kotlin_output.txt
+            echo "=== SUMMARY ===" >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            head -100 /tmp/kotlin_output.txt >> $GITHUB_STEP_SUMMARY
-            echo '...' >> $GITHUB_STEP_SUMMARY
-            tail -100 /tmp/kotlin_output.txt >> $GITHUB_STEP_SUMMARY
+            tail -50 /tmp/kotlin_output.txt >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
-            tail -20 /tmp/kotlin_output.txt | while IFS= read -r line; do
-              echo "::error::$line"
-            done
             exit 1
           fi
           echo "=== Kotlin compilation OK ==="

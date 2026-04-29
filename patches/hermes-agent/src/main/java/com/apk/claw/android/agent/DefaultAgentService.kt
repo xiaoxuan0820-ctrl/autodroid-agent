@@ -12,6 +12,7 @@ import com.apk.claw.android.agent.llm.LlmResponse
 import com.apk.claw.android.agent.llm.StreamingListener
 import com.apk.claw.android.service.ClawAccessibilityService
 import com.apk.claw.android.tool.ToolRegistry
+import com.apk.claw.android.memory.MemoryManager
 import com.apk.claw.android.tool.impl.GetScreenInfoTool
 import com.apk.claw.android.tool.ToolResult
 import com.apk.claw.android.utils.XLog
@@ -325,8 +326,13 @@ class DefaultAgentService : AgentService {
             return
         }
 
-        // 构建 System Prompt（原始 + 设备上下文）
-        val fullSystemPrompt = config.systemPrompt + buildDeviceContext()
+        // 构建 System Prompt（原始 + 设备上下文 + 记忆上下文 + 人格后缀）
+        val memoryContext = MemoryManager.buildMemoryContext(
+            currentApp = null,
+            taskPrompt = userPrompt
+        )
+        val personaSuffix = Persona.getActive().getSystemPromptSuffix()
+        val fullSystemPrompt = config.systemPrompt + buildDeviceContext() + memoryContext + "\n\n" + personaSuffix
 
         val messages = mutableListOf<ChatMessage>()
         messages.add(SystemMessage.from(fullSystemPrompt))

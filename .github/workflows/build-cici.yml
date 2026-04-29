@@ -74,6 +74,7 @@ jobs:
 
       - name: Apply 记忆系统 (MemoryManager + MemoryTools + ToolRegistry)
         run: |
+          mkdir -p hermes-android/app/src/main/java/com/apk/claw/android/memory
           cp "${{ github.workspace }}/patches/hermes-agent/src/main/java/com/apk/claw/android/memory/MemoryManager.kt" \
             hermes-android/app/src/main/java/com/apk/claw/android/memory/MemoryManager.kt
           cp "${{ github.workspace }}/patches/hermes-agent/src/main/java/com/apk/claw/android/tool/impl/MemoryTools.kt" \

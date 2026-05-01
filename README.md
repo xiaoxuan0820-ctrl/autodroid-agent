@@ -1,6 +1,6 @@
 # 🦞 CiCi — 旧手机是最便宜的 AI 硬件
 
-[![Build CiCi APK](https://github.com/xiaoxuan0820-ctrl/AegisForge/actions/workflows/build-cici.yml/badge.svg)](https://github.com/xiaoxuan0820-ctrl/AegisForge/actions/workflows/build-cici.yml)
+[![Build CiCi APK](https://github.com/xiaoxuan0820-ctrl/AegisForge-cici/actions/workflows/build-cici.yml/badge.svg)](https://github.com/xiaoxuan0820-ctrl/AegisForge-cici/actions/workflows/build-cici.yml)
 [![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 
 > 一台旧手机 + 一个开源 APK + 一行 LLM Key = 24 小时在线的私人 AI 管家。**零元成本。**
@@ -56,7 +56,7 @@
 
 ### 1. 下载安装
 
-从 [GitHub Releases](https://github.com/xiaoxuan0820-ctrl/AegisForge/releases) 下载最新 `cici-debug.apk`，安装到闲置 Android 手机。
+从 [GitHub Releases](https://github.com/xiaoxuan0820-ctrl/AegisForge-cici/releases) 下载最新 `cici-debug.apk`，安装到闲置 Android 手机。
 
 > 需要 Android 8.0+ (API ≥ 26)
 
@@ -134,6 +134,84 @@ Web 配置页面运行在 `9527` 端口，同时提供 REST API：
 | `/api/memory` | GET/POST | 查看/保存记忆 |
 | `/api/memory/delete` | POST | 删除记忆 |
 | `/api/debug/*` | GET/POST | 调试工具（仅 DEBUG 构建） |
+
+## 📊 竞品对比
+
+CiCi 并非孤岛。手机 AI 自动化赛道正在快速发展，以下是当前主要竞品的横向对比：
+
+### 核心能力对比
+
+| 工具 | 类型 | AI 驱动 | 视觉操控 | 免 Root | 多消息通道 | 定时任务 | 技能市场 | 记忆系统 | 跨设备 |
+|------|------|:-------:|:--------:|:-------:|:----------:|:--------:|:--------:|:--------:|:------:|
+| **🦞 CiCi** | 手机 APK | ✅ LLM | ✅ Accessibility | ✅ | ✅ 5 通道 | ✅ 多时段+重试 | ✅ 零代码安装 | ✅ 分类记忆 | ❌ |
+| **AppAgent** (腾讯) | PC 框架 | ✅ GPT-4V | ✅ 截图+ADB | ✅ | ❌ | ❌ | ❌ | ❌ | PC→安卓 |
+| **Xiaomi miclaw** | 系统 Agent | ✅ MiMo | ✅ 系统级 | 系统内置 | ❌ | ✅ | ✅ | ✅ | ✅ 小米全生态 |
+| **AutoGLM** (智谱) | 手机 Agent | ✅ GLM | ✅ 截图+ADB | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| **Claude Orbit** | 云 Agent | ✅ Claude | ✅ 截图 | 🚧 | ❌ | ❌ | ❌ | ✅ | 手机→电脑 |
+| **MaaFramework** | 开发框架 | 🚧 MCP | ✅ CV | ✅ | ❌ | ✅ | ✅ 插件 | ❌ | Win/Mac/Linux/安卓 |
+| **Tasker** | 自动化 App | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ 插件 | ❌ | ❌ |
+| **Auto.js** | JS 脚本引擎 | ❌ | ❌ | ✅ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| **MacroDroid** | 自动化 App | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ 模板 | ❌ | ❌ |
+
+### 各竞品特点
+
+#### AppAgent（腾讯）
+LLM 驱动的多模态 GUI Agent，用 GPT-4V 识别屏幕截图，通过 ADB 控制手机。学术开源项目（CHI 2025）。
+> **CiCi 优势**: 真机 APK 常驻运行，多消息通道远程指挥，不必连电脑
+
+#### Xiaomi miclaw（"龙虾"）
+小米 HyperOS 3 系统级 AI Agent，基于 MiMo 大模型，可控制 10 亿+ 米家 IoT 设备。2026 年 3 月封测。
+> **CiCi 优势**: 不限品牌型号，旧手机也能用，Android 8.0+ 全覆盖
+> **可借鉴**: 跨设备协同、IoT 控制、MCP 开放 SDK
+
+#### AutoGLM（智谱 × CogAgent）
+CVPR 2024 Highlight，1120×1120 高分辨率 GUI 理解，Plan-Do-Check-Act 闭环执行。
+> **CiCi 优势**: 常驻服务 + 定时任务 + 记忆系统，真正 7×24 在线
+> **可借鉴**: **PDCA 执行闭环** — 操作后截图验证，失败自动修正
+
+#### Claude Orbit（Anthropic）
+Phone-to-Desktop 远程操控，Dispatch 跨设备对话，Computer Use 桌面 Agent。2026 年 3 月发布。**Orbit** 移动端控制研发中。
+> **CiCi 优势**: 本地运行无云端依赖，隐私数据不出设备，零成本
+> **可借鉴**: **跨设备调度** — 手机收指令，电脑执行重型任务
+
+#### MaaFramework
+通用视觉自动化框架，OpenCV + ADB 控制。MaaMCP 暴露手机能力为 MCP Server。
+> **CiCi 优势**: 开箱即用 APK，无需编程，零配置上手
+> **可借鉴**: **视觉 fallback** — 无障碍服务失效时切图像识别、**MCP Server** — 暴露手机能力给其他 AI
+
+#### Tasker / Auto.js / MacroDroid
+传统 Android 自动化工具，规则/脚本驱动，无 AI 能力。
+> **CiCi 优势**: AI 自然语言交互，理解复杂意图，越用越聪明
+> **可借鉴**: **Tasker 的传感器触发** — WiFi/位置/充电状态触发自动化
+
+### CiCi 的独特定位
+
+```
+多消息通道(5)  +  LLM驱动  +  定时任务  +  记忆系统  +  零成本旧手机
+——————————————————————————————————————————————————————————
+         = 唯一「7×24 在线的私人 AI 管家」开源方案
+```
+
+CiCi 是当前市面上唯一同时具备以下全部特质的开源方案：
+- ✅ **真机常驻** — APK 安装即用，不是 PC 框架
+- ✅ **多通道远程指挥** — 钉钉/飞书/QQ/Discord/Telegram，拿手机就能控手机
+- ✅ **LLM 驱动** — 自然语言操控，不需要写规则或脚本
+- ✅ **定时自动化** — 自动打卡、签到、提醒
+- ✅ **记忆系统** — 记住你的偏好和习惯
+- ✅ **零成本** — 旧手机 + 免费 LLM（DeepSeek）就能跑
+
+### 路线图
+
+受竞品启发，计划中的增强方向：
+
+- [ ] **PDCA 执行闭环** — 操作后截图验证，失败自动重试/修正（借鉴 AutoGLM）
+- [ ] **Web 实时屏幕预览** — 浏览器远程看手机画面（借鉴 MaaFramework）
+- [ ] **视觉操控 fallback** — 无障碍服务受限时切换 ADB + 图像识别
+- [ ] **跨设备调度** — 手机收指令，联动电脑执行（借鉴 Claude Dispatch）
+- [ ] **IoT 控制接入** — 支持 Home Assistant / 米家（借鉴 Xiaomi miclaw）
+- [ ] **MCP Server** — 将手机能力暴露为 MCP 协议，供其他 AI Agent 调用
+
+---
 
 ## 🔧 开发
 

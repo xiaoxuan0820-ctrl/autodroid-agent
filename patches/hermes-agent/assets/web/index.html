@@ -1,541 +1,1576 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CiCi</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<meta name="theme-color" content="#ffffff">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<title>CiCi Console</title>
 <style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
+/* ===== CSS Variables / Theme ===== */
+:root {
+  --bg: #ffffff;
+  --bg-secondary: #f5f5f7;
+  --bg-card: #ffffff;
+  --bg-elevated: #ffffff;
+  --bg-input: #f5f5f7;
+  --bg-nav: rgba(255,255,255,0.92);
+  --bg-overlay: rgba(0,0,0,0.04);
+  --text-primary: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --text-tertiary: #86868b;
+  --text-inverse: #ffffff;
+  --border: #d2d2d7;
+  --border-light: #e5e5ea;
+  --border-focus: #0071e3;
+  --accent: #0071e3;
+  --accent-hover: #0077ed;
+  --accent-soft: rgba(0,113,227,0.08);
+  --success: #30d158;
+  --success-soft: rgba(48,209,88,0.1);
+  --warning: #ff9f0a;
+  --warning-soft: rgba(255,159,10,0.1);
+  --danger: #ff453a;
+  --danger-soft: rgba(255,69,58,0.1);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 30px rgba(0,0,0,0.10);
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+  --nav-height: 64px;
+  --nav-width: 240px;
+  --header-height: 0px;
+  --font: -apple-system, BlinkMacSystemFont, "SF Pro", "PingFang SC", "Helvetica Neue", sans-serif;
+  --font-mono: "SF Mono", SFMono-Regular, ui-monospace, "DejaVu Sans Mono", Menlo, Consolas, monospace;
+  --transition: 0.2s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #000000;
+    --bg-secondary: #1c1c1e;
+    --bg-card: #1c1c1e;
+    --bg-elevated: #2c2c2e;
+    --bg-input: #2c2c2e;
+    --bg-nav: rgba(0,0,0,0.88);
+    --bg-overlay: rgba(255,255,255,0.06);
+    --text-primary: #f5f5f7;
+    --text-secondary: #a1a1a6;
+    --text-tertiary: #6e6e73;
+    --border: #38383a;
+    --border-light: #2c2c2e;
+    --border-focus: #2997ff;
+    --accent: #2997ff;
+    --accent-hover: #40a9ff;
+    --accent-soft: rgba(41,151,255,0.12);
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+    --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
+    --text-inverse: #000000;
+  }
+}
+:root.light {
+  --bg: #ffffff; --bg-secondary: #f5f5f7; --bg-card: #ffffff; --bg-elevated: #ffffff;
+  --bg-input: #f5f5f7; --bg-nav: rgba(255,255,255,0.92); --bg-overlay: rgba(0,0,0,0.04);
+  --text-primary: #1d1d1f; --text-secondary: #6e6e73; --text-tertiary: #86868b; --text-inverse: #ffffff;
+  --border: #d2d2d7; --border-light: #e5e5ea; --border-focus: #0071e3;
+  --accent: #0071e3; --accent-hover: #0077ed; --accent-soft: rgba(0,113,227,0.08);
+  --success: #30d158; --success-soft: rgba(48,209,88,0.1);
+  --warning: #ff9f0a; --warning-soft: rgba(255,159,10,0.1);
+  --danger: #ff453a; --danger-soft: rgba(255,69,58,0.1);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06); --shadow-md: 0 4px 12px rgba(0,0,0,0.08); --shadow-lg: 0 8px 30px rgba(0,0,0,0.10);
+}
+:root.dark {
+  --bg: #000000; --bg-secondary: #1c1c1e; --bg-card: #1c1c1e; --bg-elevated: #2c2c2e;
+  --bg-input: #2c2c2e; --bg-nav: rgba(0,0,0,0.88); --bg-overlay: rgba(255,255,255,0.06);
+  --text-primary: #f5f5f7; --text-secondary: #a1a1a6; --text-tertiary: #6e6e73; --text-inverse: #000000;
+  --border: #38383a; --border-light: #2c2c2e; --border-focus: #2997ff;
+  --accent: #2997ff; --accent-hover: #40a9ff; --accent-soft: rgba(41,151,255,0.12);
+  --success: #30d158; --success-soft: rgba(48,209,88,0.1);
+  --warning: #ff9f0a; --warning-soft: rgba(255,159,10,0.1);
+  --danger: #ff453a; --danger-soft: rgba(255,69,58,0.1);
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3); --shadow-md: 0 4px 12px rgba(0,0,0,0.4); --shadow-lg: 0 8px 30px rgba(0,0,0,0.5);
+  --text-inverse: #000000;
+}
+
+/* ===== Reset & Base ===== */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; font-size: 16px; }
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: #f5f5f7;
-  color: #1d1d1f;
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
-  padding: 24px 16px;
+  overflow-x: hidden;
 }
-.container { max-width: 520px; margin: 0 auto; }
-h1 {
-  text-align: center;
-  font-size: 24px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: #5856D6;
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+img { max-width: 100%; display: block; }
+input, textarea, select, button { font-family: inherit; font-size: inherit; }
+::selection { background: var(--accent-soft); color: var(--accent); }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ===== App Shell ===== */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
 }
-.subtitle {
-  text-align: center;
-  font-size: 14px;
-  color: #86868b;
-  margin-bottom: 32px;
+
+/* ===== Sidebar (Desktop) ===== */
+.sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: var(--nav-width);
+  height: 100vh;
+  background: var(--bg-card);
+  border-right: 1px solid var(--border-light);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  transition: transform var(--transition);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
 }
-.card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 24px;
-  margin-bottom: 20px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+.sidebar-header {
+  padding: 24px 20px 16px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
-.card-title {
+.sidebar-logo {
+  width: 32px; height: 32px;
+  border-radius: var(--radius-sm);
+  background: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+  flex-shrink: 0;
+}
+.sidebar-title {
   font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.sidebar-ver {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 1px;
+}
+.sidebar-nav {
+  flex: 1;
+  padding: 12px 10px;
+  overflow-y: auto;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+  transition: all var(--transition);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-item:hover { background: var(--bg-overlay); color: var(--text-primary); }
+.nav-item.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+.nav-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+.nav-item .nav-badge {
+  margin-left: auto;
+  background: var(--accent);
+  color: #fff;
+  font-size: 11px;
   font-weight: 600;
-  margin-bottom: 20px;
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+}
+.sidebar-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border-light);
   display: flex;
   align-items: center;
   gap: 8px;
 }
-.card-title .dot {
+.theme-toggle {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--bg-overlay);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.theme-toggle:hover { background: var(--bg-input); color: var(--text-primary); }
+.theme-toggle svg { width: 18px; height: 18px; }
+.lang-toggle {
+  width: 36px; height: 36px;
+  border-radius: var(--radius-sm);
+  border: none;
+  background: var(--bg-overlay);
+  color: var(--text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  transition: all var(--transition);
+  flex-shrink: 0;
+}
+.lang-toggle:hover { background: var(--bg-input); color: var(--text-primary); }
+.sidebar-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-left: auto;
+}
+.status-dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.status-dot.online { background: var(--success); box-shadow: 0 0 0 2px var(--success-soft); }
+.status-dot.offline { background: var(--danger); box-shadow: 0 0 0 2px var(--danger-soft); }
+
+/* ===== Main Content Area ===== */
+.main-area {
+  flex: 1;
+  margin-left: var(--nav-width);
+  min-height: 100vh;
+  padding-bottom: 80px;
+  position: relative;
+}
+
+/* ===== Mobile Top Bar ===== */
+.mobile-header {
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 99;
+  background: var(--bg-nav);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-light);
+  padding: 12px 16px;
+  align-items: center;
+  justify-content: space-between;
+}
+.mobile-header .hdr-title {
+  font-size: 17px;
+  font-weight: 700;
+}
+.mobile-header .hdr-actions {
+  display: flex;
+  gap: 6px;
+}
+
+/* ===== Bottom Nav (Mobile) ===== */
+.bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: var(--bg-nav);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid var(--border-light);
+  z-index: 100;
+  padding: 0 4px;
+  align-items: center;
+  justify-content: space-around;
+}
+.bottom-nav .bnav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text-tertiary);
+  font-size: 10px;
+  font-weight: 500;
+  transition: all var(--transition);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  min-width: 48px;
+}
+.bottom-nav .bnav-item svg { width: 22px; height: 22px; }
+.bottom-nav .bnav-item.active { color: var(--accent); }
+.bottom-nav .bnav-item:hover { color: var(--text-secondary); }
+
+/* ===== Page Container ===== */
+.page {
+  display: none;
+  padding: 24px 28px;
+  max-width: 960px;
+  margin: 0 auto;
+  animation: fadeIn 0.25s ease;
+}
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.page-header {
+  margin-bottom: 24px;
+}
+.page-title {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin-bottom: 4px;
+}
+.page-desc {
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+/* ===== Cards ===== */
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--border-light);
+  transition: box-shadow var(--transition), border-color var(--transition);
+}
+.card:hover { box-shadow: var(--shadow-md); }
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-title .badge {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--bg-overlay);
+  color: var(--text-tertiary);
+}
+.card-title .badge.success { background: var(--success-soft); color: var(--success); }
+.card-title .badge.warning { background: var(--warning-soft); color: var(--warning); }
+.card-title .badge.danger { background: var(--danger-soft); color: var(--danger); }
+.card-title .badge.accent { background: var(--accent-soft); color: var(--accent); }
+
+/* ===== Stat Grid ===== */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.stat-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition), transform var(--transition);
+  cursor: default;
+}
+.stat-card:hover { box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.stat-icon {
+  width: 32px; height: 32px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+  color: #fff;
+}
+.stat-icon svg { width: 16px; height: 16px; }
+.stat-value {
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+.stat-label {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+/* ===== Status Bar ===== */
+.status-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 20px;
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.status-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.status-item .label { color: var(--text-tertiary); font-weight: 500; }
+.status-item .value { color: var(--text-primary); font-weight: 500; }
+.status-divider { width: 1px; height: 20px; background: var(--border-light); }
+
+/* ===== Activity List ===== */
+.activity-list { list-style: none; }
+.activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-dot {
   width: 8px; height: 8px;
   border-radius: 50%;
-  display: inline-block;
+  margin-top: 6px;
+  flex-shrink: 0;
 }
-.dingtalk .dot { background: #3370FF; }
-.feishu .dot { background: #00D6B9; }
-.qq .dot { background: #12B7F5; }
-.discord .dot { background: #5865F2; }
-.telegram .dot { background: #26A4E5; }
-.llm .dot { background: #34C759; }
-.persona .dot { background: #FF9500; }
-.skills .dot { background: #AF52DE; }
-.field { margin-bottom: 16px; }
-.field:last-child { margin-bottom: 0; }
-label {
+.activity-dot.info { background: var(--accent); }
+.activity-dot.success { background: var(--success); }
+.activity-dot.warning { background: var(--warning); }
+.activity-dot.error { background: var(--danger); }
+.activity-body { flex: 1; min-width: 0; }
+.activity-text { font-size: 13px; color: var(--text-primary); line-height: 1.4; }
+.activity-time { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
+.activity-empty {
+  text-align: center;
+  padding: 32px 0;
+  color: var(--text-tertiary);
+  font-size: 14px;
+}
+
+/* ===== Form Fields ===== */
+.field-group {
+  margin-bottom: 16px;
+}
+.field-group:last-child { margin-bottom: 0; }
+.field-label {
   display: block;
   font-size: 13px;
   font-weight: 500;
-  color: #86868b;
+  color: var(--text-secondary);
   margin-bottom: 6px;
 }
-input[type="text"], input[type="password"] {
-  width: 100%;
-  padding: 12px 14px;
-  border: 1.5px solid #e5e5ea;
-  border-radius: 10px;
-  font-size: 15px;
-  outline: none;
-  transition: border-color 0.2s;
-  background: #fafafa;
+.field-hint {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  margin-top: 4px;
 }
-.input-wrap input {
-  padding-right: 42px;
+.field-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-end;
 }
-input:focus {
-  border-color: #5856D6;
-  background: #fff;
-}
-.input-wrap {
-  position: relative;
-}
-.toggle-eye {
+.field-row .field-group { flex: 1; margin-bottom: 0; }
+.input-wrap { position: relative; }
+.input-wrap .toggle-eye {
   position: absolute;
-  right: 12px;
+  right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  width: 22px;
-  height: 22px;
-  cursor: pointer;
-  opacity: 0.4;
-  transition: opacity 0.2s;
-  border: none;
   background: none;
-  padding: 0;
-}
-.toggle-eye:hover { opacity: 0.7; }
-.toggle-eye svg { width: 100%; height: 100%; }
-.btn {
-  width: 100%;
-  padding: 14px;
   border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
   cursor: pointer;
-  transition: opacity 0.2s, transform 0.1s;
-  color: #fff;
-  background: #5856D6;
-}
-.btn:hover { opacity: 0.9; }
-.btn:active { transform: scale(0.98); }
-.btn:disabled { opacity: 0.5; cursor: not-allowed; }
-
-/* ====== Persona ====== */
-.persona-active {
+  color: var(--text-tertiary);
+  padding: 4px;
   display: flex;
   align-items: center;
-  gap: 14px;
-  padding: 14px;
-  background: #fff9f0;
-  border-radius: 12px;
-  margin-bottom: 16px;
+  justify-content: center;
+  transition: color var(--transition);
 }
-.persona-icon-lg {
-  font-size: 40px;
-  line-height: 1;
-}
-.persona-info { flex: 1; }
-.persona-name {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1d1d1f;
-}
-.persona-desc {
-  font-size: 13px;
-  color: #86868b;
-  margin-top: 2px;
-  line-height: 1.4;
-}
-.persona-badge {
-  font-size: 11px;
-  background: #FF9500;
-  color: #fff;
-  padding: 2px 10px;
-  border-radius: 10px;
-  font-weight: 500;
-}
-.persona-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-}
-.persona-option {
-  padding: 12px;
-  border: 1.5px solid #e5e5ea;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: all 0.2s;
-  text-align: center;
-  background: #fff;
-}
-.persona-option:hover { border-color: #FF9500; background: #fff9f0; }
-.persona-option.active {
-  border-color: #FF9500;
-  background: #fff9f0;
-}
-.persona-option .p-icon { font-size: 28px; display: block; margin-bottom: 4px; }
-.persona-option .p-name { font-size: 14px; font-weight: 600; color: #1d1d1f; }
+.input-wrap .toggle-eye:hover { color: var(--text-secondary); }
+.input-wrap .toggle-eye svg { width: 18px; height: 18px; }
 
-/* ====== Skills ====== */
-.skill-list { margin-bottom: 12px; }
-.skill-item {
+input[type="text"], input[type="password"], input[type="number"], input[type="url"], input[type="search"],
+textarea, select {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+}
+input:focus, textarea:focus, select:focus {
+  border-color: var(--border-focus);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.input-wrap input { padding-right: 40px; }
+
+/* ===== Select ===== */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+
+/* ===== Slider ===== */
+.slider-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 12px;
-  border: 1.5px solid #f0f0f5;
-  border-radius: 10px;
-  margin-bottom: 8px;
-  transition: border-color 0.2s;
 }
-.skill-item:hover { border-color: #AF52DE; }
-.skill-item.disabled { opacity: 0.5; }
-.skill-icon { font-size: 24px; line-height: 1; }
-.skill-info { flex: 1; min-width: 0; }
-.skill-name { font-size: 14px; font-weight: 600; color: #1d1d1f; }
-.skill-meta {
-  font-size: 11px;
-  color: #aeaeb2;
-  margin-top: 2px;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-.skill-tag {
-  background: #f2f2f7;
-  padding: 1px 8px;
-  border-radius: 4px;
-  font-size: 10px;
-}
-.toggle-switch {
-  width: 44px; height: 26px;
-  background: #e5e5ea;
-  border-radius: 13px;
+.slider-row input[type="range"] {
+  flex: 1;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  outline: none;
   cursor: pointer;
-  position: relative;
-  transition: background 0.2s;
-  flex-shrink: 0;
-  border: none;
 }
-.toggle-switch.on { background: #AF52DE; }
-.toggle-switch::after {
+.slider-row input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px; height: 18px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--bg-card);
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.slider-row input[type="range"]::-webkit-slider-thumb:hover { transform: scale(1.15); }
+.slider-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  min-width: 32px;
+  text-align: center;
+}
+
+/* ===== Buttons ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.97); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover:not(:disabled) { background: var(--accent-hover); box-shadow: 0 2px 8px var(--accent-soft); }
+.btn-secondary { background: var(--bg-overlay); color: var(--text-primary); }
+.btn-secondary:hover:not(:disabled) { background: var(--bg-input); }
+.btn-success { background: var(--success); color: #fff; }
+.btn-success:hover:not(:disabled) { box-shadow: 0 2px 8px var(--success-soft); }
+.btn-danger { background: var(--danger); color: #fff; }
+.btn-danger:hover:not(:disabled) { box-shadow: 0 2px 8px var(--danger-soft); }
+.btn-ghost { background: transparent; color: var(--text-secondary); }
+.btn-ghost:hover:not(:disabled) { background: var(--bg-overlay); color: var(--text-primary); }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+.btn-lg { padding: 14px 28px; font-size: 16px; }
+.btn-block { width: 100%; }
+.btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ===== Toggle Switch ===== */
+.toggle-switch {
+  position: relative;
+  width: 44px; height: 26px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.toggle-switch input { display: none; }
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--border);
+  border-radius: 26px;
+  transition: background 0.2s;
+}
+.toggle-slider::after {
   content: '';
-  width: 22px; height: 22px;
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 20px; height: 20px;
   background: #fff;
   border-radius: 50%;
-  position: absolute;
-  top: 2px; left: 2px;
-  transition: left 0.2s;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  transition: transform 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
-.toggle-switch.on::after { left: 20px; }
-.delete-skill {
-  width: 26px; height: 26px;
-  border-radius: 50%;
-  border: none;
-  background: #ffe5e5;
-  color: #FF3B30;
-  font-size: 14px;
+.toggle-switch input:checked + .toggle-slider { background: var(--success); }
+.toggle-switch input:checked + .toggle-slider::after { transform: translateX(18px); }
+
+/* ===== Collapse ===== */
+.collapse-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   cursor: pointer;
-  flex-shrink: 0;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  padding: 4px 0;
+}
+.collapse-header:hover { opacity: 0.8; }
+.collapse-arrow {
+  transition: transform 0.25s ease;
+  color: var(--text-tertiary);
+}
+.collapse-arrow.open { transform: rotate(180deg); }
+.collapse-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, opacity 0.25s ease, padding 0.25s ease;
+  opacity: 0;
+  padding: 0;
+}
+.collapse-body.open {
+  max-height: 800px;
+  opacity: 1;
+  padding-top: 16px;
+}
+
+/* ===== Tab Bar ===== */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-input);
+  border-radius: var(--radius-sm);
+  padding: 3px;
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+.tab-item {
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.tab-item.active { background: var(--bg-card); color: var(--text-primary); box-shadow: var(--shadow-sm); }
+.tab-item:hover:not(.active) { color: var(--text-primary); }
+
+/* ===== Tag / Chip ===== */
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  font-size: 11px;
+  font-weight: 500;
+  background: var(--bg-overlay);
+  color: var(--text-tertiary);
+}
+.tag.accent { background: var(--accent-soft); color: var(--accent); }
+.tag.success { background: var(--success-soft); color: var(--success); }
+.tag.warning { background: var(--warning-soft); color: var(--warning); }
+.tag.danger { background: var(--danger-soft); color: var(--danger); }
+
+/* ===== Channel Card ===== */
+.channel-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 12px;
+}
+.channel-card {
+  background: var(--bg-card);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-light);
+  overflow: hidden;
+  transition: box-shadow var(--transition), border-color var(--transition);
+}
+.channel-card:hover { box-shadow: var(--shadow-md); }
+.channel-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.channel-card-header .ch-icon {
+  width: 32px; height: 32px;
+  border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
 }
-.delete-skill:hover { background: #FF3B30; color: #fff; }
-.empty-skills {
-  text-align: center;
-  padding: 16px;
-  color: #aeaeb2;
+.channel-card-header .ch-name { flex: 1; font-size: 14px; font-weight: 600; }
+.channel-card-header .ch-status { font-size: 11px; font-weight: 500; }
+.channel-card-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease, padding 0.25s ease;
+  padding: 0 16px;
+}
+.channel-card-body.open {
+  max-height: 400px;
+  padding: 0 16px 16px;
+}
+
+/* ===== Skill Card ===== */
+.skill-card {
+  display: flex;
+  gap: 14px;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+.skill-card:last-child { border-bottom: none; }
+.skill-icon {
+  width: 40px; height: 40px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+.skill-body { flex: 1; min-width: 0; }
+.skill-name { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+.skill-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.4; }
+.skill-tags { display: flex; gap: 4px; flex-wrap: wrap; margin-top: 6px; }
+.skill-actions { display: flex; align-items: flex-start; gap: 6px; flex-shrink: 0; padding-top: 2px; }
+.skill-toggle { margin-top: 2px; }
+
+/* ===== Persona Card ===== */
+.persona-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+.persona-card {
+  background: var(--bg-card);
+  border: 2px solid var(--border-light);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  cursor: pointer;
+  transition: all var(--transition);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.persona-card:hover { border-color: var(--border); box-shadow: var(--shadow-md); }
+.persona-card.active { border-color: var(--accent); background: var(--accent-soft); }
+.persona-emoji { font-size: 32px; margin-bottom: 10px; }
+.persona-name { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.persona-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.4; margin-bottom: 6px; }
+.persona-scene { font-size: 12px; color: var(--text-tertiary); }
+.persona-check {
+  display: none;
+  margin-top: 10px;
+  align-items: center;
+  gap: 4px;
   font-size: 13px;
+  font-weight: 600;
+  color: var(--accent);
 }
-/* Memory */
-.memory-card .dot { background: #FF6B6B !important; }
+.persona-card.active .persona-check { display: flex; }
+
+/* ===== Memory ===== */
+.search-wrap {
+  position: relative;
+  margin-bottom: 16px;
+}
+.search-wrap svg {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--text-tertiary);
+  pointer-events: none;
+}
+.search-wrap input { padding-left: 36px; }
+
+.memory-filter {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.filter-chip {
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 500;
+  background: var(--bg-overlay);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all var(--transition);
+  user-select: none;
+  border: 1px solid transparent;
+}
+.filter-chip:hover { color: var(--text-primary); }
+.filter-chip.active { background: var(--accent-soft); color: var(--accent); border-color: var(--accent); }
+
+.memory-list { list-style: none; }
 .memory-item {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border-light);
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  padding: 8px 10px;
-  border: 1.5px solid #f0f0f5;
-  border-radius: 10px;
-  margin-bottom: 6px;
-  font-size: 13px;
+  transition: background var(--transition);
 }
-.memory-cat {
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 8px;
-  border-radius: 6px;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-.memory-cat.profile { background: #E8F5E9; color: #2E7D32; }
-.memory-cat.pref { background: #F3E5F5; color: #7B1FA2; }
-.memory-cat.app { background: #E3F2FD; color: #1565C0; }
-.memory-cat.fact { background: #FFF3E0; color: #E65100; }
-.memory-cat.cred { background: #FFEBEE; color: #C62828; }
-.memory-body { flex: 1; min-width: 0; }
-.memory-key { font-weight: 600; color: #1d1d1f; }
-.memory-val { color: #86868b; margin-top: 1px; }
-.memory-del {
-  width: 22px; height: 22px;
-  border-radius: 50%;
-  border: none;
-  background: #ffe5e5;
-  color: #FF3B30;
-  font-size: 12px;
-  cursor: pointer;
-  flex-shrink: 0;
+.memory-item:hover { background: var(--bg-overlay); }
+.memory-item:last-child { border-bottom: none; }
+.memory-key { font-size: 13px; font-weight: 600; color: var(--text-primary); word-break: break-all; }
+.memory-value { font-size: 13px; color: var(--text-secondary); margin-top: 2px; word-break: break-all; line-height: 1.4; }
+.memory-meta {
   display: flex;
+  gap: 6px;
   align-items: center;
-  justify-content: center;
+  margin-top: 6px;
+  flex-wrap: wrap;
 }
-.memory-del:hover { background: #FF3B30; color: #fff; }
-.builtin-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #86868b;
-  margin-bottom: 8px;
-  margin-top: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.install-btn-sm {
-  padding: 4px 12px;
-  border: 1.5px solid #AF52DE;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  background: #fff;
-  color: #AF52DE;
+.memory-del {
   flex-shrink: 0;
-  transition: all 0.15s;
+  padding: 4px;
+  background: none;
+  border: none;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all var(--transition);
 }
-.install-btn-sm:hover { background: #AF52DE; color: #fff; }
-.install-btn-sm.installed {
-  border-color: #e5e5ea;
-  color: #86868b;
-  background: #f5f5f7;
-  cursor: default;
+.memory-del:hover { background: var(--danger-soft); color: var(--danger); }
+.memory-empty {
+  text-align: center;
+  padding: 32px 0;
+  color: var(--text-tertiary);
+  font-size: 14px;
 }
 
-.toast {
+/* ===== Toast ===== */
+.toast-container {
   position: fixed;
-  top: 24px;
+  top: 16px;
   left: 50%;
-  transform: translateX(-50%) translateY(-80px);
-  padding: 12px 24px;
-  border-radius: 10px;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
   font-size: 14px;
   font-weight: 500;
   color: #fff;
-  z-index: 9999;
-  transition: transform 0.3s ease;
-  pointer-events: none;
-}
-.toast.show { transform: translateX(-50%) translateY(0); }
-.toast.success { background: #34C759; }
-.toast.error { background: #FF3B30; }
-.loading {
+  box-shadow: var(--shadow-lg);
+  pointer-events: auto;
+  animation: toastIn 0.3s ease;
+  max-width: 90vw;
   text-align: center;
-  padding: 40px;
-  color: #86868b;
-  font-size: 15px;
 }
 /* ====== Screen Preview ====== */
 .screen-preview .dot { background: #007AFF !important; }
 .btn-sm {
   padding: 8px 16px;
-  border: 1.5px solid #e5e5ea;
+  border: 1.5px solid var(--border);
   border-radius: 8px;
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  background: #fff;
-  color: #5856D6;
+  background: var(--bg-card);
+  color: var(--accent);
   transition: all 0.15s;
 }
-.btn-sm:hover { border-color: #5856D6; background: #f5f5ff; }
+.btn-sm:hover { border-color: var(--accent); background: var(--bg-hover); }
 /* ====== Backup ====== */
 .backup .dot { background: #FF9500 !important; }
+.toast.success { background: var(--success); }
+.toast.error { background: var(--danger); }
+.toast.info { background: var(--accent); }
+.toast.warning { background: var(--warning); }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-12px); }
+}
+
+/* ===== Collapsible Section (Settings) ===== */
+.settings-section {
+  margin-bottom: 24px;
+}
+.settings-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+  padding: 0 4px;
+}
+
+/* ===== Loading / Skeleton ===== */
+.skeleton {
+  background: linear-gradient(90deg, var(--bg-overlay) 25%, var(--bg-input) 50%, var(--bg-overlay) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease infinite;
+  border-radius: var(--radius-sm);
+}
+@keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+.loading-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--text-tertiary);
+}
+.loading-state .spinner {
+  display: inline-block;
+  width: 24px; height: 24px;
+  border: 3px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 12px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ===== JSON Display ===== */
+.json-block {
+  background: var(--bg-secondary);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  overflow-x: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  margin-top: 8px;
+  border: 1px solid var(--border-light);
+}
+
+/* ===== Overlay / Modal ===== */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.open { display: flex; }
+.modal-box {
+  background: var(--bg-card);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  max-width: 420px;
+  width: 100%;
+  box-shadow: var(--shadow-lg);
+  animation: fadeIn 0.2s ease;
+}
+.modal-title { font-size: 17px; font-weight: 700; margin-bottom: 8px; }
+.modal-body { font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5; }
+.modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+/* ===== Responsive ===== */
+@media (max-width: 1024px) {
+  .page { padding: 20px; }
+  .channel-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .main-area { margin-left: 0; }
+  .mobile-header { display: flex; }
+  .bottom-nav { display: flex; }
+  .page { padding: 16px; padding-bottom: 16px; }
+  .page-title { font-size: 22px; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .persona-grid { grid-template-columns: repeat(2, 1fr); }
+  .btn-lg { width: 100%; }
+  .status-bar { gap: 10px; }
+  .status-divider { display: none; }
+}
+@media (max-width: 480px) {
+  .page { padding: 12px; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .stat-card { padding: 12px 14px; }
+  .stat-value { font-size: 20px; }
+  .persona-grid { grid-template-columns: 1fr; }
+  .btn { padding: 10px 16px; }
+  .card { padding: 16px; }
+}
+
+/* ===== Utility ===== */
+.flex { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.justify-between { justify-content: space-between; }
+.gap-2 { gap: 8px; }
+.gap-3 { gap: 12px; }
+.gap-4 { gap: 16px; }
+.mt-1 { margin-top: 4px; }
+.mt-2 { margin-top: 8px; }
+.mt-3 { margin-top: 12px; }
+.mt-4 { margin-top: 16px; }
+.mb-2 { margin-bottom: 8px; }
+.mb-3 { margin-bottom: 12px; }
+.mb-4 { margin-bottom: 16px; }
+.text-center { text-align: center; }
+.text-sm { font-size: 13px; }
+.text-xs { font-size: 12px; }
+.text-secondary { color: var(--text-secondary); }
+.text-tertiary { color: var(--text-tertiary); }
+.font-mono { font-family: var(--font-mono); }
+.truncate { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hidden { display: none !important; }
 </style>
 </head>
 <body>
-<div class="container">
-  <h1 data-i18n="title"></h1>
-  <p class="subtitle" data-i18n="subtitle"></p>
 
-  <div id="loading" class="loading" data-i18n="loading"></div>
+<div class="app-shell" id="app">
 
-  <div id="content" style="display:none">
-    <!-- LLM -->
-    <div class="card llm">
-      <div class="card-title"><span class="dot"></span><span data-i18n="llm_title"></span></div>
-      <div class="field">
-        <label data-i18n="llm_api_key"></label>
-        <div class="input-wrap">
-          <input type="password" id="llmApiKey" data-i18n-placeholder="ph_llm_api_key" autocomplete="off">
-          <button class="toggle-eye" onclick="togglePassword('llmApiKey', this)" data-i18n-title="toggle_visibility"></button>
+  <!-- ===== Sidebar ===== -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">Ci</div>
+      <div>
+        <div class="sidebar-title" data-i18n="app_name"></div>
+        <div class="sidebar-ver" data-i18n="app_ver"></div>
+      </div>
+    </div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <div class="nav-item active" data-route="dashboard">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <span data-i18n="nav_dashboard"></span>
+      </div>
+      <div class="nav-item" data-route="llm">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        <span data-i18n="nav_llm"></span>
+      </div>
+      <div class="nav-item" data-route="channels">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span data-i18n="nav_channels"></span>
+      </div>
+      <div class="nav-item" data-route="skills">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+        <span data-i18n="nav_skills"></span>
+      </div>
+      <div class="nav-item" data-route="persona">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span data-i18n="nav_persona"></span>
+      </div>
+      <div class="nav-item" data-route="memory">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        <span data-i18n="nav_memory"></span>
+      </div>
+      <div class="nav-item" data-route="settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span data-i18n="nav_settings"></span>
+      </div>
+    </nav>
+    <div class="sidebar-footer">
+      <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="themeIconSun"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="themeIconMoon" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <button class="lang-toggle" id="langToggle" title="Switch language">EN</button>
+      <div class="sidebar-status">
+        <span class="status-dot offline" id="statusDot"></span>
+        <span id="statusText" data-i18n="status_offline"></span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== Main Area ===== -->
+  <main class="main-area">
+
+    <!-- Mobile Header -->
+    <div class="mobile-header" id="mobileHeader">
+      <div class="hdr-title" id="mobileTitle" data-i18n="nav_dashboard"></div>
+      <div class="hdr-actions">
+        <button class="theme-toggle" id="themeToggleMobile" title="Toggle theme">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+        <button class="lang-toggle" id="langToggleMobile" title="Switch language">EN</button>
+      </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- PAGE: Dashboard                -->
+    <!-- ============================== -->
+    <div class="page active" id="page-dashboard">
+      <div class="page-header">
+        <div class="page-title" data-i18n="dash_title"></div>
+        <div class="page-desc" data-i18n="dash_desc"></div>
+      </div>
+      <!-- Status Bar -->
+      <div class="status-bar" id="dashStatusBar">
+        <div class="status-item">
+          <span class="status-dot offline" id="dashStatusDot"></span>
+          <span class="value" id="dashStatusText" data-i18n="status_offline"></span>
+        </div>
+        <div class="status-divider"></div>
+        <div class="status-item">
+          <span class="label" data-i18n="dash_model"></span>
+          <span class="value" id="dashModelName">--</span>
+        </div>
+        <div class="status-divider"></div>
+        <div class="status-item">
+          <span class="label" data-i18n="dash_persona"></span>
+          <span class="value" id="dashPersona">--</span>
         </div>
       </div>
-      <div class="field">
-        <label data-i18n="llm_base_url"></label>
-        <input type="text" id="llmBaseUrl" data-i18n-placeholder="ph_llm_base_url" autocomplete="off">
-      </div>
-      <div class="field">
-        <label data-i18n="llm_model_name"></label>
-        <input type="text" id="llmModelName" data-i18n-placeholder="ph_llm_model" autocomplete="off">
-      </div>
-      <p style="font-size:12px;color:#86868b;margin-top:8px;" data-i18n="llm_tip"></p>
-    </div>
-
-    <!-- Persona -->
-    <div class="card persona">
-      <div class="card-title"><span class="dot"></span>🎭 人格</div>
-      <div id="personaActive" class="persona-active">
-        <span class="persona-icon-lg" id="personaIcon">🤖</span>
-        <div class="persona-info">
-          <div class="persona-name" id="personaName">极客助手</div>
-          <div class="persona-desc" id="personaDesc">全能自动化助手</div>
+      <!-- Stat Cards -->
+      <div class="stat-grid" id="dashStats">
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--accent)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <div class="stat-value" id="statSkills">0</div>
+          <div class="stat-label" data-i18n="dash_stat_skills"></div>
         </div>
-        <span class="persona-badge">当前</span>
-      </div>
-      <div class="persona-grid" id="personaGrid"></div>
-    </div>
-
-    <!-- Skills -->
-    <div class="card skills">
-      <div class="card-title"><span class="dot"></span>🛠 技能 <span style="font-size:12px;color:#86868b;font-weight:400;margin-left:4px;">(<span id="skillCount">0</span>)</span></div>
-      <div class="skill-list" id="installedSkills"></div>
-      <div id="builtinSkills"></div>
-    </div>
-
-    <!-- Memory -->
-    <div class="card memory-card">
-      <div class="card-title"><span class="dot" style="background:#FF6B6B"></span>🧠 记忆 <span style="font-size:12px;color:#86868b;font-weight:400;margin-left:4px;">(<span id="memCount">0</span>)</span></div>
-      <div style="margin-bottom:8px;">
-        <input type="text" id="memSearch" placeholder="搜索记忆..." style="width:100%;padding:8px 12px;border:1.5px solid #e5e5ea;border-radius:8px;font-size:13px;" oninput="loadMemories()">
-      </div>
-      <div class="memory-list" id="memoryList">
-        <div class="empty-skills">暂无记忆</div>
-      </div>
-    </div>
-
-    <!-- Screen Preview -->
-    <div class="card screen-preview">
-      <div class="card-title"><span class="dot"></span>📺 实时预览</div>
-      <div style="text-align:center;">
-        <img id="screenPreview" src="/api/screenshot?t=0" style="max-width:100%;border-radius:8px;border:1px solid #e5e5ea;background:#000;" alt="屏幕预览">
-        <div style="margin-top:8px;display:flex;gap:8px;justify-content:center;">
-          <button class="btn-sm" onclick="refreshScreen()">🔄 刷新</button>
-          <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:#86868b;cursor:pointer;">
-            <input type="checkbox" id="autoRefresh" onchange="toggleAutoRefresh()"> 自动刷新(3s)
-          </label>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--success)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+          </div>
+          <div class="stat-value" id="statMemory">0</div>
+          <div class="stat-label" data-i18n="dash_stat_memory"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--warning)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          </div>
+          <div class="stat-value" id="statCron">0</div>
+          <div class="stat-label" data-i18n="dash_stat_cron"></div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon" style="background:var(--danger)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          </div>
+          <div class="stat-value" id="statExecutions">0</div>
+          <div class="stat-label" data-i18n="dash_stat_exec"></div>
         </div>
       </div>
+      <!-- Screen Preview -->
+      <div class="card screen-preview">
+        <div class="card-title"><span class="dot"></span>📺 实时预览</div>
+        <div style="text-align:center;">
+          <img id="screenPreview" src="/api/screenshot?t=0" style="max-width:100%;border-radius:8px;border:1px solid var(--border);background:#000;" alt="屏幕预览">
+          <div style="margin-top:8px;display:flex;gap:8px;justify-content:center;">
+            <button class="btn-sm" onclick="refreshScreen()">🔄 刷新</button>
+            <label style="display:flex;align-items:center;gap:4px;font-size:13px;color:var(--text-tertiary);cursor:pointer;">
+              <input type="checkbox" id="autoRefresh" onchange="toggleAutoRefresh()"> 自动刷新(3s)
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="card">
+        <div class="card-title" data-i18n="dash_activity"></div>
+        <ul class="activity-list" id="dashActivityList">
+          <li class="activity-empty" data-i18n="dash_activity_empty"></li>
+        </ul>
+      </div>
     </div>
 
-    <!-- Channels -->
-    <div class="card dingtalk">
-      <div class="card-title"><span class="dot"></span><span data-i18n="dingtalk"></span></div>
-      <div class="field">
-        <label>Client ID</label>
-        <input type="text" id="dingtalkAppKey" data-i18n-placeholder="ph_dingtalk_id" autocomplete="off">
+    <!-- ============================== -->
+    <!-- PAGE: LLM Config               -->
+    <!-- ============================== -->
+    <div class="page" id="page-llm">
+      <div class="page-header">
+        <div class="page-title" data-i18n="llm_title"></div>
+        <div class="page-desc" data-i18n="llm_desc"></div>
       </div>
-      <div class="field">
-        <label>Client Secret</label>
-        <div class="input-wrap">
-          <input type="password" id="dingtalkAppSecret" data-i18n-placeholder="ph_dingtalk_secret" autocomplete="off">
-          <button class="toggle-eye" onclick="togglePassword('dingtalkAppSecret', this)" data-i18n-title="toggle_visibility"></button>
+      <div class="card">
+        <div class="field-group">
+          <label class="field-label" data-i18n="llm_provider"></label>
+          <select id="llmProvider">
+            <option value="deepseek">DeepSeek</option>
+            <option value="openai">OpenAI</option>
+            <option value="anthropic">Anthropic</option>
+            <option value="custom" data-i18n="llm_custom"></option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label" data-i18n="llm_model"></label>
+          <input type="text" id="llmModelName" data-i18n-placeholder="ph_llm_model" autocomplete="off">
+        </div>
+        <div class="field-group">
+          <label class="field-label" data-i18n="llm_api_key"></label>
+          <div class="input-wrap">
+            <input type="password" id="llmApiKey" data-i18n-placeholder="ph_llm_api_key" autocomplete="off">
+            <button class="toggle-eye" onclick="togglePassword('llmApiKey',this)" data-i18n-title="toggle_visibility">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="field-group">
+          <label class="field-label" data-i18n="llm_base_url"></label>
+          <input type="url" id="llmBaseUrl" data-i18n-placeholder="ph_llm_base_url" autocomplete="off">
+        </div>
+        <div class="field-group">
+          <label class="field-label" data-i18n="llm_temperature"></label>
+          <div class="slider-row">
+            <input type="range" id="llmTemperature" min="0" max="2" step="0.1" value="0.7">
+            <span class="slider-value" id="llmTempValue">0.7</span>
+          </div>
+        </div>
+        <!-- Advanced: collapse -->
+        <div class="collapse-header" onclick="toggleCollapse('llmAdvanced')">
+          <span class="field-label" style="margin:0;cursor:pointer" data-i18n="llm_advanced"></span>
+          <svg class="collapse-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+        <div class="collapse-body" id="llmAdvanced">
+          <div class="field-group">
+            <label class="field-label">Max Tokens</label>
+            <input type="number" id="llmMaxTokens" placeholder="4096" min="1" max="65536">
+          </div>
+          <div class="field-group">
+            <label class="field-label" data-i18n="llm_extra_params"></label>
+            <textarea id="llmExtraParams" rows="3" data-i18n-placeholder="ph_llm_extra_params" style="resize:vertical;font-family:var(--font-mono);font-size:12px"></textarea>
+          </div>
+        </div>
+        <div class="btn-group mt-4">
+          <button class="btn btn-primary btn-lg btn-block" id="llmSaveBtn" onclick="saveLLM()" data-i18n="llm_save"></button>
+          <button class="btn btn-secondary btn-lg" id="llmTestBtn" onclick="testLLM()" data-i18n="llm_test"></button>
         </div>
       </div>
     </div>
 
-    <div class="card feishu">
-      <div class="card-title"><span class="dot"></span><span data-i18n="feishu"></span></div>
-      <div class="field">
-        <label>App ID</label>
-        <input type="text" id="feishuAppId" data-i18n-placeholder="ph_feishu_id" autocomplete="off">
+    <!-- ============================== -->
+    <!-- PAGE: Channels                 -->
+    <!-- ============================== -->
+    <div class="page" id="page-channels">
+      <div class="page-header">
+        <div class="page-title" data-i18n="ch_title"></div>
+        <div class="page-desc" data-i18n="ch_desc"></div>
       </div>
-      <div class="field">
-        <label>App Secret</label>
-        <div class="input-wrap">
-          <input type="password" id="feishuAppSecret" data-i18n-placeholder="ph_feishu_secret" autocomplete="off">
-          <button class="toggle-eye" onclick="togglePassword('feishuAppSecret', this)" data-i18n-title="toggle_visibility"></button>
+      <div class="channel-grid" id="channelGrid">
+        <!-- populated by JS -->
+      </div>
+      <div class="mt-4">
+        <button class="btn btn-primary btn-lg btn-block" id="chSaveBtn" onclick="saveChannels()" data-i18n="ch_save"></button>
+      </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- PAGE: Skills                   -->
+    <!-- ============================== -->
+    <div class="page" id="page-skills">
+      <div class="page-header">
+        <div class="page-title" data-i18n="sk_title"></div>
+        <div class="page-desc" data-i18n="sk_desc"></div>
+      </div>
+      <div class="tab-bar" id="skillsTabBar">
+        <div class="tab-item active" data-tab="installed" data-i18n="sk_installed"></div>
+        <div class="tab-item" data-tab="market" data-i18n="sk_market"></div>
+      </div>
+      <div id="skillsInstalled">
+        <div class="card" id="installedSkillsList"></div>
+        <div class="loading-state" id="installedSkillsLoading" style="display:none">
+          <div class="spinner"></div>
+          <div data-i18n="loading"></div>
+        </div>
+      </div>
+      <div id="skillsMarket" style="display:none">
+        <div class="card" id="marketSkillsList"></div>
+        <div class="loading-state" id="marketSkillsLoading" style="display:none">
+          <div class="spinner"></div>
+          <div data-i18n="loading"></div>
         </div>
       </div>
     </div>
 
-    <div class="card qq">
-      <div class="card-title"><span class="dot"></span>QQ</div>
-      <div class="field">
-        <label>App ID</label>
-        <input type="text" id="qqAppId" data-i18n-placeholder="ph_qq_id" autocomplete="off">
+    <!-- ============================== -->
+    <!-- PAGE: Persona                  -->
+    <!-- ============================== -->
+    <div class="page" id="page-persona">
+      <div class="page-header">
+        <div class="page-title" data-i18n="per_title"></div>
+        <div class="page-desc" data-i18n="per_desc"></div>
       </div>
-      <div class="field">
-        <label>App Secret</label>
-        <div class="input-wrap">
-          <input type="password" id="qqAppSecret" data-i18n-placeholder="ph_qq_secret" autocomplete="off">
-          <button class="toggle-eye" onclick="togglePassword('qqAppSecret', this)" data-i18n-title="toggle_visibility"></button>
+      <div class="persona-grid" id="personaGrid">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- ============================== -->
+    <!-- PAGE: Memory                   -->
+    <!-- ============================== -->
+    <div class="page" id="page-memory">
+      <div class="page-header">
+        <div class="page-title" data-i18n="mem_title"></div>
+        <div class="page-desc" data-i18n="mem_desc"></div>
+      </div>
+      <div class="search-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" id="memorySearch" data-i18n-placeholder="ph_mem_search" oninput="loadMemory()">
+      </div>
+      <div class="memory-filter" id="memoryFilter">
+        <span class="filter-chip active" data-filter="" data-i18n="mem_all"></span>
+        <span class="filter-chip" data-filter="user_info" data-i18n="mem_user"></span>
+        <span class="filter-chip" data-filter="preference" data-i18n="mem_pref"></span>
+        <span class="filter-chip" data-filter="app_context" data-i18n="mem_app"></span>
+        <span class="filter-chip" data-filter="fact" data-i18n="mem_fact"></span>
+        <span class="filter-chip" data-filter="credential" data-i18n="mem_cred"></span>
+      </div>
+      <div class="card" id="memoryList">
+        <div class="loading-state">
+          <div class="spinner"></div>
+          <div data-i18n="loading"></div>
         </div>
       </div>
     </div>
 
-    <div class="card discord">
-      <div class="card-title"><span class="dot"></span>Discord</div>
-      <div class="field">
-        <label>Bot Token</label>
-        <div class="input-wrap">
-          <input type="password" id="discordBotToken" data-i18n-placeholder="ph_discord_token" autocomplete="off">
-          <button class="toggle-eye" onclick="togglePassword('discordBotToken', this)" data-i18n-title="toggle_visibility"></button>
+    <!-- ============================== -->
+    <!-- PAGE: Settings                 -->
+    <!-- ============================== -->
+    <div class="page" id="page-settings">
+      <div class="page-header">
+        <div class="page-title" data-i18n="set_title"></div>
+        <div class="page-desc" data-i18n="set_desc"></div>
+      </div>
+
+      <div class="settings-section">
+        <div class="settings-section-title" data-i18n="set_execution"></div>
+        <div class="card">
+          <div class="field-group">
+            <label class="field-label" data-i18n="set_backend"></label>
+            <select id="setBackend">
+              <option value="adb">ADB</option>
+              <option value="hermes">Hermes</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label class="field-label">ADB Path</label>
+            <input type="text" id="setAdbPath" placeholder="/usr/local/bin/adb" autocomplete="off">
+          </div>
+          <div class="collapse-header" onclick="toggleCollapse('setHermes')">
+            <span class="field-label" style="margin:0;cursor:pointer" data-i18n="set_hermes"></span>
+            <svg class="collapse-arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          <div class="collapse-body" id="setHermes">
+            <div class="field-group">
+              <label class="field-label" data-i18n="set_hermes_host"></label>
+              <input type="text" id="setHermesHost" placeholder="localhost" autocomplete="off">
+            </div>
+            <div class="field-group">
+              <label class="field-label" data-i18n="set_hermes_port"></label>
+              <input type="number" id="setHermesPort" placeholder="9090">
+            </div>
+          </div>
         </div>
       </div>
-      <p style="font-size:12px;color:#86868b;margin-top:8px;" data-i18n="discord_tip"></p>
-    </div>
 
-    <div class="card telegram">
-      <div class="card-title"><span class="dot"></span>Telegram</div>
-      <div class="field">
-        <label>Bot Token</label>
-        <div class="input-wrap">
-          <input type="password" id="telegramBotToken" data-i18n-placeholder="ph_telegram_token" autocomplete="off">
-          <button class="toggle-eye" onclick="togglePassword('telegramBotToken', this)" data-i18n-title="toggle_visibility"></button>
+      <div class="settings-section">
+        <div class="settings-section-title" data-i18n="set_security"></div>
+        <div class="card">
+          <div class="field-group">
+            <label class="field-label" data-i18n="set_max_taps"></label>
+            <input type="number" id="setMaxTaps" placeholder="100" min="1">
+          </div>
+          <div class="field-group">
+            <label class="field-label" data-i18n="set_max_steps"></label>
+            <input type="number" id="setMaxSteps" placeholder="50" min="1">
+          </div>
+          <div class="field-group">
+            <label class="field-label" data-i18n="set_max_exec"></label>
+            <input type="number" id="setMaxExecTime" placeholder="120" min="1">
+            <div class="field-hint" data-i18n="set_max_exec_hint"></div>
+          </div>
         </div>
       </div>
-      <p style="font-size:12px;color:#86868b;margin-top:8px;" data-i18n="telegram_tip"></p>
-    </div>
 
-    <!-- Backup & Restore -->
-    <div class="card backup">
-      <div class="card-title"><span class="dot"></span>💾 备份与恢复</div>
-      <div style="display:flex;gap:10px;">
-        <button class="btn" onclick="exportConfig()" style="flex:1;padding:10px;font-size:14px;">📤 导出配置</button>
-        <label class="btn" style="flex:1;padding:10px;font-size:14px;text-align:center;cursor:pointer;" for="importFileInput">📥 导入配置</label>
-        <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importConfig(event)">
+      <div class="settings-section">
+        <div class="settings-section-title" data-i18n="set_actions"></div>
+        <div class="card">
+          <div class="btn-group">
+            <button class="btn btn-secondary" onclick="exportConfig()" data-i18n="set_export"></button>
+            <button class="btn btn-secondary" onclick="document.getElementById('importFileInput').click()" data-i18n="set_import"></button>
+            <input type="file" id="importFileInput" accept=".json" style="display:none" onchange="importConfig(event)">
+            <button class="btn btn-danger" onclick="confirmRestart()" data-i18n="set_restart"></button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <button class="btn" id="saveBtn" onclick="save()" data-i18n="save_btn"></button>
+  </main>
+
+  <!-- ===== Bottom Nav (Mobile) ===== -->
+  <nav class="bottom-nav" id="bottomNav">
+    <div class="bnav-item active" data-route="dashboard">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      <span data-i18n="nav_dashboard_s"></span>
+    </div>
+    <div class="bnav-item" data-route="llm">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      <span data-i18n="nav_llm_s"></span>
+    </div>
+    <div class="bnav-item" data-route="channels">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <span data-i18n="nav_channels_s"></span>
+    </div>
+    <div class="bnav-item" data-route="skills">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      <span data-i18n="nav_skills_s"></span>
+    </div>
+    <div class="bnav-item" data-route="persona">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span data-i18n="nav_persona_s"></span>
+    </div>
+    <div class="bnav-item" data-route="memory">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+      <span data-i18n="nav_memory_s"></span>
+    </div>
+    <div class="bnav-item" data-route="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span data-i18n="nav_settings_s"></span>
+    </div>
+  </nav>
+
+</div>
+
+<!-- ===== Toast Container ===== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- ===== Confirm Modal ===== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeModal()" data-i18n="cancel"></button>
+      <button class="btn btn-danger" id="modalConfirmBtn" onclick="" data-i18n="confirm"></button>
+    </div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
-
 <script>
+/* ===================================================
+   CiCi Console - Full SPA
+   =================================================== */
+
 // ====== i18n ======
-const i18nMessages = {
+const i18n = {
   'zh': {
-    title: 'CiCi 配置',
-    subtitle: '在此页面配置 LLM、人格、技能与渠道凭证',
+    app_name: 'CiCi Console',
+    app_ver: 'v1.0',
+    toggle_visibility: '显示/隐藏',
     loading: '加载中...',
+    status_online: '运行中',
+    status_offline: '离线',
+    cancel: '取消',
+    confirm: '确认',
+    nav_dashboard: '仪表盘',
+    nav_llm: 'LLM 配置',
+    nav_channels: '消息通道',
+    nav_skills: '技能系统',
+    nav_persona: '人格切换',
+    nav_memory: '记忆管理',
+    nav_settings: '系统设置',
+    nav_dashboard_s: '首页',
+    nav_llm_s: 'LLM',
+    nav_channels_s: '通道',
+    nav_skills_s: '技能',
+    nav_persona_s: '人格',
+    nav_memory_s: '记忆',
+    nav_settings_s: '设置',
+    // Dashboard
+    dash_title: '仪表盘',
+    dash_desc: '系统运行状态概览',
+    dash_model: '模型',
+    dash_persona: '人格',
+    dash_stat_skills: '已安装技能',
+    dash_stat_memory: '记忆条目',
+    dash_stat_cron: '定时任务',
+    dash_stat_exec: '今日执行',
+    dash_activity: '最近活动',
+    dash_activity_empty: '暂无活动记录',
+    // LLM
     llm_title: 'LLM 配置',
+    llm_desc: '配置 AI 模型连接参数',
+    llm_provider: '提供商',
+    llm_custom: '自定义',
+    llm_model: '模型名称',
     llm_api_key: 'API Key',
     llm_base_url: 'Base URL',
-    llm_model_name: '模型名称',
-    ph_llm_api_key: '如 sk-xxx（留空表示不修改）',
+    llm_temperature: '温度 (Temperature)',
+    llm_advanced: '高级选项',
+    llm_extra_params: '额外请求参数 (JSON)',
+    ph_llm_model: '如 deepseek-chat, gpt-4o, claude-3-sonnet',
+    ph_llm_api_key: '输入 API Key（留空不修改）',
     ph_llm_base_url: '如 https://api.openai.com/v1（留空使用默认）',
-    ph_llm_model: '如 gpt-4o、gpt-4o-mini',
-    llm_tip: 'API Key 仅保存在设备本地，可通过设置 → LLM 配置 在应用内修改',
-    load_failed: '加载失败，请检查连接',
-    dingtalk: '钉钉',
-    feishu: '飞书',
+    ph_llm_extra_params: '{ "top_p": 0.9, "frequency_penalty": 0 }',
+    llm_save: '保存 LLM 配置',
+    llm_test: '测试连接',
+    llm_testing: '测试中...',
+    llm_test_ok: '连接成功！',
+    llm_test_fail: '连接失败',
+    llm_saved: 'LLM 配置已保存',
+    // Channels
+    ch_title: '消息通道',
+    ch_desc: '配置各消息平台的机器人凭证',
+    ch_config: '配置',
+    ch_not_configured: '未配置',
+    ch_configured: '已配置',
+    ch_save: '批量保存通道配置',
+    ch_saved: '通道配置已保存，将自动重连',
+    ch_dingtalk: '钉钉',
+    ch_feishu: '飞书',
+    ch_qq: 'QQ',
+    ch_discord: 'Discord',
+    ch_telegram: 'Telegram',
+    ch_wechat: '微信',
     ph_dingtalk_id: '输入 Client ID',
     ph_dingtalk_secret: '输入 Client Secret',
     ph_feishu_id: '输入 App ID',
@@ -543,31 +1578,161 @@ const i18nMessages = {
     ph_qq_id: '输入 QQ 机器人 App ID',
     ph_qq_secret: '输入 App Secret',
     ph_discord_token: '输入 Discord Bot Token',
-    discord_tip: '需在 Discord Developer Portal 开启 Message Content Intent',
     ph_telegram_token: '输入 Telegram Bot Token',
+    ph_wechat_id: '输入 App ID',
+    ph_wechat_secret: '输入 App Secret',
+    discord_tip: '需在 Discord Developer Portal 开启 Message Content Intent',
     telegram_tip: '通过 @BotFather 创建 Bot 并获取 Token',
-    toggle_visibility: '显示/隐藏',
-    save_btn: '保存配置',
-    saving: '保存中...',
-    save_success: '配置已保存，通道将自动重连',
+    // Skills
+    sk_title: '技能系统',
+    sk_desc: '管理和安装自动化技能模块',
+    sk_installed: '已安装',
+    sk_market: '技能市场',
+    sk_enabled: '已启用',
+    sk_disabled: '已禁用',
+    sk_edit: '编辑',
+    sk_delete: '删除',
+    sk_install: '安装',
+    sk_installing: '安装中...',
+    sk_delete_confirm: '确定要删除此技能吗？',
+    sk_toggle_ok: '状态已切换',
+    sk_install_ok: '技能安装成功',
+    sk_delete_ok: '技能已删除',
+    sk_no_installed: '暂无已安装的技能',
+    sk_no_market: '暂无可用内置技能',
+    sk_triggers: '触发方式',
+    // Persona
+    per_title: '人格切换',
+    per_desc: '选择 AI 助手的人格模式',
+    per_activate: '当前激活',
+    per_switch: '切换',
+    per_switched: '已切换到',
+    per_geek: '极客助手',
+    per_geek_desc: '技术范儿，精准高效，擅长技术问题解答和代码调试',
+    per_geek_scene: '适合：技术开发、系统运维、代码调试',
+    per_office: '办公搭子',
+    per_office_desc: '专业稳重，条理清晰，擅长文档处理和工作流程优化',
+    per_office_scene: '适合：文档撰写、会议安排、项目管理',
+    per_creative: '创作达人',
+    per_creative_desc: '天马行空，富有创意，擅长文案创作和头脑风暴',
+    per_creative_scene: '适合：文案撰写、创意策划、内容创作',
+    per_efficient: '效率管家',
+    per_efficient_scene: '适合：日常事务、任务管理、信息整理',
+    per_efficient_desc: '高效务实，井井有条，擅长任务管理和效率提升',
+    // Memory
+    mem_title: '记忆管理',
+    mem_desc: '查看和管理 AI 助手的记忆数据',
+    ph_mem_search: '搜索记忆...',
+    mem_all: '全部',
+    mem_user: '用户信息',
+    mem_pref: '偏好',
+    mem_app: '应用上下文',
+    mem_fact: '事实',
+    mem_cred: '凭证',
+    mem_delete: '删除',
+    mem_delete_confirm: '确定要删除此记忆吗？',
+    mem_deleted: '记忆已删除',
+    mem_empty: '暂无记忆数据',
+    mem_no_results: '没有找到匹配的记忆',
+    // Settings
+    set_title: '系统设置',
+    set_desc: '配置系统运行参数',
+    set_execution: '执行引擎',
+    set_backend: '执行后端',
+    set_hermes: 'Hermes 连接配置',
+    set_hermes_host: 'Host',
+    set_hermes_port: 'Port',
+    set_security: '安全限制',
+    set_max_taps: '最大点击次数 (Max Taps)',
+    set_max_steps: '最大步骤数 (Max Steps)',
+    set_max_exec: '最大执行时间 (秒)',
+    set_max_exec_hint: '单次任务最长执行时间，超时将自动终止',
+    set_actions: '操作',
+    set_export: '导出配置',
+    set_import: '导入配置',
+    set_restart: '重启服务',
+    set_restart_confirm: '确定要重启服务吗？',
+    set_restarting: '正在重启服务...',
+    set_export_ok: '配置已导出',
+    set_import_ok: '配置已导入',
+    set_import_fail: '配置文件格式错误',
+    // General
     save_failed: '保存失败',
     unknown_error: '未知错误',
+    error: '错误',
+    success: '成功',
+    yes: '是',
+    no: '否',
   },
   'en': {
-    title: 'CiCi Config',
-    subtitle: 'Configure LLM, Persona, Skills and channel credentials',
+    app_name: 'CiCi Console',
+    app_ver: 'v1.0',
+    toggle_visibility: 'Show/Hide',
     loading: 'Loading...',
-    llm_title: 'LLM Config',
+    status_online: 'Online',
+    status_offline: 'Offline',
+    cancel: 'Cancel',
+    confirm: 'Confirm',
+    nav_dashboard: 'Dashboard',
+    nav_llm: 'LLM Config',
+    nav_channels: 'Channels',
+    nav_skills: 'Skills',
+    nav_persona: 'Persona',
+    nav_memory: 'Memory',
+    nav_settings: 'Settings',
+    nav_dashboard_s: 'Home',
+    nav_llm_s: 'LLM',
+    nav_channels_s: 'Chat',
+    nav_skills_s: 'Skills',
+    nav_persona_s: 'Persona',
+    nav_memory_s: 'Memory',
+    nav_settings_s: 'Settings',
+    // Dashboard
+    dash_title: 'Dashboard',
+    dash_desc: 'System status overview',
+    dash_model: 'Model',
+    dash_persona: 'Persona',
+    dash_stat_skills: 'Installed Skills',
+    dash_stat_memory: 'Memory Entries',
+    dash_stat_cron: 'Scheduled Tasks',
+    dash_stat_exec: 'Today Executions',
+    dash_activity: 'Recent Activity',
+    dash_activity_empty: 'No recent activity',
+    // LLM
+    llm_title: 'LLM Configuration',
+    llm_desc: 'Configure AI model connection parameters',
+    llm_provider: 'Provider',
+    llm_custom: 'Custom',
+    llm_model: 'Model Name',
     llm_api_key: 'API Key',
     llm_base_url: 'Base URL',
-    llm_model_name: 'Model Name',
-    ph_llm_api_key: 'e.g. sk-xxx (leave empty to keep current)',
+    llm_temperature: 'Temperature',
+    llm_advanced: 'Advanced Options',
+    llm_extra_params: 'Extra Request Parameters (JSON)',
+    ph_llm_model: 'e.g. deepseek-chat, gpt-4o, claude-3-sonnet',
+    ph_llm_api_key: 'Enter API Key (leave empty to keep current)',
     ph_llm_base_url: 'e.g. https://api.openai.com/v1 (empty = default)',
-    ph_llm_model: 'e.g. gpt-4o, gpt-4o-mini',
-    llm_tip: 'API Key is stored locally only. You can also edit in Settings → LLM Config',
-    load_failed: 'Failed to load, please check connection',
-    dingtalk: 'DingTalk',
-    feishu: 'Feishu (Lark)',
+    ph_llm_extra_params: '{ "top_p": 0.9, "frequency_penalty": 0 }',
+    llm_save: 'Save LLM Config',
+    llm_test: 'Test Connection',
+    llm_testing: 'Testing...',
+    llm_test_ok: 'Connection successful!',
+    llm_test_fail: 'Connection failed',
+    llm_saved: 'LLM config saved',
+    // Channels
+    ch_title: 'Message Channels',
+    ch_desc: 'Configure bot credentials for messaging platforms',
+    ch_config: 'Configure',
+    ch_not_configured: 'Not configured',
+    ch_configured: 'Configured',
+    ch_save: 'Save All Channel Configs',
+    ch_saved: 'Channel configs saved. Auto-reconnecting...',
+    ch_dingtalk: 'DingTalk',
+    ch_feishu: 'Feishu (Lark)',
+    ch_qq: 'QQ',
+    ch_discord: 'Discord',
+    ch_telegram: 'Telegram',
+    ch_wechat: 'WeChat',
     ph_dingtalk_id: 'Enter Client ID',
     ph_dingtalk_secret: 'Enter Client Secret',
     ph_feishu_id: 'Enter App ID',
@@ -575,461 +1740,853 @@ const i18nMessages = {
     ph_qq_id: 'Enter QQ Bot App ID',
     ph_qq_secret: 'Enter App Secret',
     ph_discord_token: 'Enter Discord Bot Token',
-    discord_tip: 'Enable Message Content Intent in Discord Developer Portal',
     ph_telegram_token: 'Enter Telegram Bot Token',
+    ph_wechat_id: 'Enter App ID',
+    ph_wechat_secret: 'Enter App Secret',
+    discord_tip: 'Enable Message Content Intent in Discord Developer Portal',
     telegram_tip: 'Create a bot via @BotFather and get the token',
-    toggle_visibility: 'Show/Hide',
-    save_btn: 'Save',
-    saving: 'Saving...',
-    save_success: 'Saved. Channels will reconnect automatically.',
-    save_failed: 'Save failed',
+    // Skills
+    sk_title: 'Skill System',
+    sk_desc: 'Manage and install automation skill modules',
+    sk_installed: 'Installed',
+    sk_market: 'Marketplace',
+    sk_enabled: 'Enabled',
+    sk_disabled: 'Disabled',
+    sk_edit: 'Edit',
+    sk_delete: 'Delete',
+    sk_install: 'Install',
+    sk_installing: 'Installing...',
+    sk_delete_confirm: 'Are you sure you want to delete this skill?',
+    sk_toggle_ok: 'Status toggled',
+    sk_install_ok: 'Skill installed successfully',
+    sk_delete_ok: 'Skill deleted',
+    sk_no_installed: 'No installed skills',
+    sk_no_market: 'No built-in skills available',
+    sk_triggers: 'Triggers',
+    // Persona
+    per_title: 'Persona',
+    per_desc: 'Select the AI assistant personality mode',
+    per_activate: 'Active',
+    per_switch: 'Switch',
+    per_switched: 'Switched to',
+    per_geek: 'Geek Assistant',
+    per_geek_desc: 'Technical, precise, and efficient. Great for code debugging and technical Q&A',
+    per_geek_scene: 'Best for: Development, System Ops, Debugging',
+    per_office: 'Office Pal',
+    per_office_desc: 'Professional and organized. Great for document processing and workflow optimization',
+    per_office_scene: 'Best for: Documents, Meetings, Project Management',
+    per_creative: 'Creative Master',
+    per_creative_desc: 'Imaginative and creative. Great for copywriting and brainstorming',
+    per_creative_scene: 'Best for: Copywriting, Creative Planning, Content Creation',
+    per_efficient: 'Efficiency Manager',
+    per_efficient_desc: 'Efficient and practical. Great for task management and productivity',
+    per_efficient_scene: 'Best for: Daily Tasks, Task Management, Information Organization',
+    // Memory
+    mem_title: 'Memory Manager',
+    mem_desc: 'View and manage AI assistant memory data',
+    ph_mem_search: 'Search memory...',
+    mem_all: 'All',
+    mem_user: 'User Info',
+    mem_pref: 'Preference',
+    mem_app: 'App Context',
+    mem_fact: 'Fact',
+    mem_cred: 'Credential',
+    mem_delete: 'Delete',
+    mem_delete_confirm: 'Are you sure you want to delete this memory?',
+    mem_deleted: 'Memory deleted',
+    mem_empty: 'No memory data',
+    mem_no_results: 'No matching memories found',
+    // Settings
+    set_title: 'System Settings',
+    set_desc: 'Configure system runtime parameters',
+    set_execution: 'Execution Engine',
+    set_backend: 'Execution Backend',
+    set_hermes: 'Hermes Connection Config',
+    set_hermes_host: 'Host',
+    set_hermes_port: 'Port',
+    set_security: 'Security Limits',
+    set_max_taps: 'Max Taps',
+    set_max_steps: 'Max Steps',
+    set_max_exec: 'Max Execution Time (seconds)',
+    set_max_exec_hint: 'Maximum execution time for a single task. Task will be terminated if exceeded.',
+    set_actions: 'Actions',
+    set_export: 'Export Config',
+    set_import: 'Import Config',
+    set_restart: 'Restart Service',
+    set_restart_confirm: 'Are you sure you want to restart the service?',
+    set_restarting: 'Restarting service...',
+    set_export_ok: 'Config exported',
+    set_import_ok: 'Config imported successfully',
+    set_import_fail: 'Invalid config file format',
+    // General
+    save_failed: 'Failed to save',
     unknown_error: 'Unknown error',
-  },
-  'ja': {
-    title: 'CiCi 設定',
-    subtitle: 'LLM、ペルソナ、スキル、チャネル設定',
-    loading: '読み込み中...',
-    llm_title: 'LLM 設定',
-    llm_api_key: 'API Key',
-    llm_base_url: 'Base URL',
-    llm_model_name: 'モデル名',
-    ph_llm_api_key: '例: sk-xxx（空欄で現状維持）',
-    ph_llm_base_url: '例: https://api.openai.com/v1（空欄でデフォルト）',
-    ph_llm_model: '例: gpt-4o、gpt-4o-mini',
-    llm_tip: 'API Key は端末内にのみ保存されます。設定 → LLM 設定 からも変更可能',
-    load_failed: '読み込みに失敗しました。接続を確認してください',
-    dingtalk: 'DingTalk',
-    feishu: 'Feishu (Lark)',
-    ph_dingtalk_id: 'Client ID を入力',
-    ph_dingtalk_secret: 'Client Secret を入力',
-    ph_feishu_id: 'App ID を入力',
-    ph_feishu_secret: 'App Secret を入力',
-    ph_qq_id: 'QQ ボット App ID を入力',
-    ph_qq_secret: 'App Secret を入力',
-    ph_discord_token: 'Discord Bot Token を入力',
-    discord_tip: 'Discord Developer Portal で Message Content Intent を有効にしてください',
-    ph_telegram_token: 'Telegram Bot Token を入力',
-    telegram_tip: '@BotFather で Bot を作成して Token を取得してください',
-    toggle_visibility: '表示/非表示',
-    save_btn: '保存',
-    saving: '保存中...',
-    save_success: '設定を保存しました。チャネルは自動的に再接続されます。',
-    save_failed: '保存に失敗しました',
-    unknown_error: '不明なエラー',
-  },
+    error: 'Error',
+    success: 'Success',
+    yes: 'Yes',
+    no: 'No',
+  }
 };
 
+// ====== I18n helpers ======
+let currentLang = 'zh';
 function detectLang() {
   const lang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
-  if (lang.startsWith('zh')) return 'zh';
-  if (lang.startsWith('ja')) return 'ja';
-  return 'en';
+  return lang.startsWith('zh') ? 'zh' : 'en';
 }
-
-const currentLang = detectLang();
-const t = (key) => (i18nMessages[currentLang] || i18nMessages['en'])[key] || i18nMessages['en'][key] || key;
-
+function t(key) {
+  const msg = (i18n[currentLang] || i18n['zh'])[key];
+  return msg !== undefined ? msg : key;
+}
 function applyI18n() {
-  document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : currentLang;
-  document.title = t('title');
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    el.textContent = t(el.dataset.i18n);
-  });
-  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-    el.placeholder = t(el.dataset.i18nPlaceholder);
-  });
-  document.querySelectorAll('[data-i18n-title]').forEach(el => {
-    el.title = t(el.dataset.i18nTitle);
-  });
+  document.documentElement.lang = currentLang === 'zh' ? 'zh-CN' : 'en';
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+  document.querySelectorAll('[data-i18n-title]').forEach(el => { el.title = t(el.dataset.i18nTitle); });
 }
 
-applyI18n();
+// ====== Theme ======
+let currentTheme = 'auto';
+function getEffectiveTheme() {
+  if (currentTheme === 'light') return 'light';
+  if (currentTheme === 'dark') return 'dark';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+function applyTheme() {
+  const effective = getEffectiveTheme();
+  document.documentElement.className = effective;
+  // Show correct icon
+  const isDark = effective === 'dark';
+  document.querySelectorAll('#themeIconSun, #themeIconMoon').forEach(el => {
+    el.style.display = (el.id === 'themeIconSun' && !isDark) || (el.id === 'themeIconMoon' && isDark) ? '' : 'none';
+  });
+}
+function toggleTheme() {
+  if (currentTheme === 'auto') currentTheme = 'light';
+  else if (currentTheme === 'light') currentTheme = 'dark';
+  else currentTheme = 'auto';
+  applyTheme();
+  // Update meta theme-color
+  document.querySelector('meta[name="theme-color"]').content = getEffectiveTheme() === 'dark' ? '#000000' : '#ffffff';
+}
 
-// ====== Icons ======
-const eyeOpen = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
-const eyeClosed = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+// ====== Language Toggle ======
+function toggleLang() {
+  currentLang = currentLang === 'zh' ? 'en' : 'zh';
+  applyI18n();
+  document.querySelectorAll('.lang-toggle').forEach(el => { el.textContent = currentLang === 'zh' ? 'EN' : '中'; });
+  document.title = t('app_name');
+}
 
-document.querySelectorAll('.toggle-eye').forEach(btn => { btn.innerHTML = eyeClosed; });
+// ====== Routing ======
+const routeNames = {
+  dashboard: 'nav_dashboard',
+  llm: 'nav_llm',
+  channels: 'nav_channels',
+  skills: 'nav_skills',
+  persona: 'nav_persona',
+  memory: 'nav_memory',
+  settings: 'nav_settings'
+};
 
+function navigate(route) {
+  // Update pages
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const page = document.getElementById('page-' + route);
+  if (page) page.classList.add('active');
+
+  // Update sidebar nav
+  document.querySelectorAll('#sidebarNav .nav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.route === route);
+  });
+  // Update bottom nav
+  document.querySelectorAll('.bottom-nav .bnav-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.route === route);
+  });
+
+  // Update mobile title
+  const titleEl = document.getElementById('mobileTitle');
+  if (routeNames[route]) titleEl.textContent = t(routeNames[route]);
+
+  // Update hash
+  if (window.location.hash !== '#' + route) {
+    history.pushState(null, '', '#' + route);
+  }
+
+  // Load page data
+  loadPageData(route);
+}
+
+function loadPageData(route) {
+  switch (route) {
+    case 'dashboard': loadDashboard(); break;
+    case 'llm': loadLLM(); break;
+    case 'channels': loadChannels(); break;
+    case 'skills': loadSkills(); break;
+    case 'persona': loadPersona(); break;
+    case 'memory': loadMemory(); break;
+    case 'settings': loadSettings(); break;
+  }
+}
+
+function handleHashChange() {
+  const hash = window.location.hash.replace('#', '') || 'dashboard';
+  if (routeNames[hash]) navigate(hash);
+}
+
+// Init navigation
+document.querySelectorAll('[data-route]').forEach(el => {
+  el.addEventListener('click', () => navigate(el.dataset.route));
+});
+window.addEventListener('hashchange', handleHashChange);
+window.addEventListener('popstate', handleHashChange);
+
+// ====== Toast ======
+function showToast(msg, type = 'info', duration = 3000) {
+  const container = document.getElementById('toastContainer');
+  const toast = document.createElement('div');
+  toast.className = 'toast ' + type;
+  toast.textContent = msg;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.animation = 'toastOut 0.3s ease forwards';
+    setTimeout(() => toast.remove(), 300);
+  }, duration);
+}
+
+// ====== Modal ======
+function showModal(title, body, onConfirm) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalBody').textContent = body;
+  document.getElementById('modalOverlay').classList.add('open');
+  const btn = document.getElementById('modalConfirmBtn');
+  btn.onclick = function() {
+    closeModal();
+    if (onConfirm) onConfirm();
+  };
+}
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+// ====== Collapse ======
+function toggleCollapse(id) {
+  const body = document.getElementById(id);
+  const arrow = body.previousElementSibling ? body.previousElementSibling.querySelector('.collapse-arrow') : null;
+  if (!arrow && body.parentElement) {
+    // Try parent
+    const ph = body.parentElement.querySelector('.collapse-arrow');
+    if (ph) ph.classList.toggle('open');
+  } else if (arrow) {
+    arrow.classList.toggle('open');
+  }
+  body.classList.toggle('open');
+}
+
+// ====== Password Toggle ======
 function togglePassword(inputId, btn) {
   const input = document.getElementById(inputId);
   if (input.type === 'password') {
     input.type = 'text';
-    btn.innerHTML = eyeOpen;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
   } else {
     input.type = 'password';
-    btn.innerHTML = eyeClosed;
+    btn.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
   }
 }
 
-// ====== Fields ======
-const fields = ['dingtalkAppKey', 'dingtalkAppSecret', 'feishuAppId', 'feishuAppSecret', 'qqAppId', 'qqAppSecret', 'discordBotToken', 'telegramBotToken'];
-const llmFields = ['llmApiKey', 'llmBaseUrl', 'llmModelName'];
-
-// ====== Persona ======
-let personaList = [], currentPersonaId = '';
-
-async function loadPersona() {
+// ====== API Helpers ======
+async function apiGet(path) {
   try {
-    const res = await fetch('/api/persona');
-    const json = await res.json();
-    if (json.code !== 0 || !json.data) return;
-    personaList = json.data.list || [];
-    currentPersonaId = json.data.id;
-    renderPersona();
-  } catch (e) { /* ignore */ }
-}
-
-function renderPersona() {
-  const active = personaList.find(p => p.id === currentPersonaId);
-  if (active) {
-    document.getElementById('personaIcon').textContent = active.icon || '🤖';
-    document.getElementById('personaName').textContent = active.name;
-    document.getElementById('personaDesc').textContent = active.description;
+    const res = await fetch(path);
+    return await res.json();
+  } catch (e) {
+    console.error('API GET error:', path, e);
+    return { code: -1, message: e.message };
   }
-  const grid = document.getElementById('personaGrid');
-  grid.innerHTML = personaList.map(p =>
-    '<div class="persona-option' + (p.id === currentPersonaId ? ' active' : '') + '" onclick="switchPersona(\'' + p.id + '\')">'
-    + '<span class="p-icon">' + p.icon + '</span>'
-    + '<span class="p-name">' + p.name + '</span>'
-    + '</div>'
-  ).join('');
 }
-
-async function switchPersona(id) {
+async function apiPost(path, body) {
   try {
-    const res = await fetch('/api/persona', {
+    const res = await fetch(path, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id })
+      body: JSON.stringify(body)
     });
-    const json = await res.json();
-    if (json.code === 0) {
-      currentPersonaId = id;
-      renderPersona();
-      const p = personaList.find(x => x.id === id);
-      showToast('✅ 已切换至 ' + (p ? p.icon + ' ' + p.name : id), 'success');
-    } else {
-      showToast('❌ ' + (json.message || '切换失败'), 'error');
-    }
+    return await res.json();
   } catch (e) {
-    showToast('❌ ' + e.message, 'error');
+    console.error('API POST error:', path, e);
+    return { code: -1, message: e.message };
+  }
+}
+async function apiDelete(path) {
+  try {
+    const res = await fetch(path, { method: 'DELETE' });
+    return await res.json();
+  } catch (e) {
+    console.error('API DELETE error:', path, e);
+    return { code: -1, message: e.message };
   }
 }
 
-// ====== Skills ======
-let installedSkills = [], builtinSkills = [];
-
-async function loadSkills() {
-  try {
-    const [instRes, builtinRes] = await Promise.all([
-      fetch('/api/skills'),
-      fetch('/api/skills/builtin')
-    ]);
-    const instJson = await instRes.json();
-    const builtinJson = await builtinRes.json();
-    if (instJson.code === 0) installedSkills = instJson.data || [];
-    if (builtinJson.code === 0) builtinSkills = builtinJson.data || [];
-    renderSkills();
-  } catch (e) { /* ignore */ }
+// ====== Status Update ======
+let lastStatus = 'offline';
+function updateStatus(online) {
+  lastStatus = online ? 'online' : 'offline';
+  document.querySelectorAll('.status-dot').forEach(el => {
+    el.className = 'status-dot ' + lastStatus;
+  });
+  const text = online ? t('status_online') : t('status_offline');
+  document.querySelectorAll('#statusText, #dashStatusText').forEach(el => {
+    el.textContent = text;
+  });
 }
 
-function isInstalled(builtinId) {
-  return installedSkills.some(s => s.id === builtinId);
-}
+// ============================================================
+// PAGE LOADERS
+// ============================================================
 
-function renderSkills() {
-  // Installed
-  const instEl = document.getElementById('installedSkills');
-  document.getElementById('skillCount').textContent = installedSkills.length;
-  if (!installedSkills.length) {
-    instEl.innerHTML = '<div class="empty-skills">暂无已安装技能</div>';
+// ====== DASHBOARD ======
+async function loadDashboard() {
+  // Load LLM info for model name
+  const llmRes = await apiGet('/api/llm');
+  if (llmRes.code === 0 && llmRes.data) {
+    document.getElementById('dashModelName').textContent = llmRes.data.llmModelName || llmRes.data.model || '--';
+    updateStatus(true);
   } else {
-    instEl.innerHTML = installedSkills.map(s => {
-      const trigger = s.triggerType === 'MANUAL' ? '手动' : (s.triggerType === 'DAILY' ? '每天 ' + s.triggerTime : '工作日 ' + s.triggerTime);
-      return '<div class="skill-item' + (s.enabled ? '' : ' disabled') + '">'
-        + '<span class="skill-icon">' + (s.icon || '🔧') + '</span>'
-        + '<div class="skill-info">'
-        + '<div class="skill-name">' + s.name + '</div>'
-        + '<div class="skill-meta">'
-        + '<span>' + trigger + '</span>'
-        + '<span class="skill-tag">' + (s.categoryLabel || s.category || '') + '</span>'
-        + '</div></div>'
-        + '<button class="toggle-switch' + (s.enabled ? ' on' : '') + '" onclick="toggleSkill(\'' + s.id + '\')" title="开关"></button>'
-        + '<button class="delete-skill" onclick="deleteSkill(\'' + s.id + '\',\'' + s.name.replace(/'/g,"\\'") + '\')" title="删除">✕</button>'
-        + '</div>';
-    }).join('');
+    updateStatus(false);
   }
 
-  // Builtin
-  const builtinEl = document.getElementById('builtinSkills');
-  const uninstalledBuiltins = builtinSkills.filter(b => !isInstalled(b.id));
-  if (uninstalledBuiltins.length > 0) {
-    let html = '<div class="builtin-label">🔥 官方推荐</div>';
-    html += uninstalledBuiltins.map(s => {
-      const trigger = s.triggerType === 'MANUAL' ? '手动' : (s.triggerType === 'DAILY' ? '每天 ' + s.triggerTime : '工作日 ' + s.triggerTime);
-      return '<div class="skill-item">'
-        + '<span class="skill-icon">' + (s.icon || '🔧') + '</span>'
-        + '<div class="skill-info">'
-        + '<div class="skill-name">' + s.name + '</div>'
-        + '<div class="skill-meta">'
-        + '<span>' + trigger + '</span>'
-        + '</div></div>'
-        + '<button class="install-btn-sm" onclick="installSkill(\'' + s.id + '\')">+ 安装</button>'
-        + '</div>';
-    }).join('');
-    builtinEl.innerHTML = html;
-  } else {
-    builtinEl.innerHTML = '';
+  // Load persona
+  const perRes = await apiGet('/api/persona');
+  if (perRes.code === 0 && perRes.data) {
+    const personaName = perRes.data.currentPersona || perRes.data.persona || perRes.data.name || '--';
+    document.getElementById('dashPersona').textContent = personaName;
   }
-}
 
-async function installSkill(id) {
+  // Load skills count
+  const skRes = await apiGet('/api/skills');
+  if (skRes.code === 0 && Array.isArray(skRes.data)) {
+    document.getElementById('statSkills').textContent = skRes.data.length;
+  }
+
+  // Load memory count
+  const memRes = await apiGet('/api/memory');
+  if (memRes.code === 0 && Array.isArray(memRes.data)) {
+    document.getElementById('statMemory').textContent = memRes.data.length;
+  }
+
+  // Try to load activities from debug
   try {
-    const res = await fetch('/api/skills/install', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id })
-    });
-    const json = await res.json();
-    if (json.code === 0) {
-      showToast('✅ 已安装', 'success');
-      loadSkills();
-    } else {
-      showToast('❌ ' + (json.message || '安装失败'), 'error');
+    const actRes = await apiGet('/api/debug/tools');
+    if (actRes.code === 0 && Array.isArray(actRes.data)) {
+      document.getElementById('statExecutions').textContent = actRes.data.length;
     }
-  } catch (e) {
-    showToast('❌ ' + e.message, 'error');
+  } catch (e) {}
+
+  // Mock recent activities (replace with real data if API available)
+  const list = document.getElementById('dashActivityList');
+  list.innerHTML = '<li class="activity-empty">' + t('dash_activity_empty') + '</li>';
+}
+
+// ====== LLM ======
+async function loadLLM() {
+  const res = await apiGet('/api/llm');
+  if (res.code === 0 && res.data) {
+    const d = res.data;
+    if (d.llmModelName) document.getElementById('llmModelName').value = d.llmModelName;
+    if (d.llmBaseUrl) document.getElementById('llmBaseUrl').value = d.llmBaseUrl;
+    // Determine provider from model name
+    const model = (d.llmModelName || '').toLowerCase();
+    let provider = 'custom';
+    if (model.includes('deepseek')) provider = 'deepseek';
+    else if (model.includes('gpt') || model.includes('openai')) provider = 'openai';
+    else if (model.includes('claude') || model.includes('anthropic')) provider = 'anthropic';
+    document.getElementById('llmProvider').value = provider;
+    if (d.temperature !== undefined) {
+      document.getElementById('llmTemperature').value = d.temperature;
+      document.getElementById('llmTempValue').textContent = d.temperature;
+    }
+    // Don't fill API key from server for security
   }
+  // Temperature slider display
+  document.getElementById('llmTemperature').addEventListener('input', function() {
+    document.getElementById('llmTempValue').textContent = this.value;
+  });
 }
 
-async function toggleSkill(id) {
-  const skill = installedSkills.find(s => s.id === id);
-  if (!skill) return;
-  try {
-    const res = await fetch('/api/skills/toggle', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id, enabled: !skill.enabled })
-    });
-    const json = await res.json();
-    if (json.code === 0) {
-      skill.enabled = !skill.enabled;
-      renderSkills();
-      showToast(skill.enabled ? '✅ 已开启' : '⏸ 已暂停', 'success');
-    }
-  } catch (e) {
-    showToast('❌ ' + e.message, 'error');
-  }
-}
-
-async function deleteSkill(id, name) {
-  if (!confirm('确定删除技能「' + name + '」吗？')) return;
-  try {
-    const res = await fetch('/api/skills/delete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id })
-    });
-    const json = await res.json();
-    if (json.code === 0) {
-      showToast('已删除: ' + name, 'success');
-      loadSkills();
-    } else {
-      showToast('❌ ' + (json.message || '删除失败'), 'error');
-    }
-  } catch (e) {
-    showToast('❌ ' + e.message, 'error');
-  }
-}
-
-// ====== Memory ======
-async function loadMemories() {
-  const q = document.getElementById('memSearch').value;
-  try {
-    const url = q ? '/api/memory?query=' + encodeURIComponent(q) : '/api/memory';
-    const res = await fetch(url);
-    const json = await res.json();
-    if (json.code === 0) {
-      const memories = json.data || [];
-      document.getElementById('memCount').textContent = json.total || memories.length;
-      renderMemories(memories);
-    }
-  } catch (e) { /* ignore */ }
-}
-
-function renderMemories(memories) {
-  const el = document.getElementById('memoryList');
-  if (!memories.length) {
-    el.innerHTML = '<div class="empty-skills">暂无记忆</div>';
-    return;
-  }
-  const catMap = { USER_PROFILE:'profile', PREFERENCE:'pref', APP_CONTEXT:'app', FACT:'fact', CREDENTIAL:'cred' };
-  el.innerHTML = memories.map(m => {
-    const cssClass = catMap[m.category] || 'fact';
-    return '<div class="memory-item">'
-      + '<span class="memory-cat ' + cssClass + '">' + (m.categoryLabel || m.category) + '</span>'
-      + '<div class="memory-body">'
-      + '<div class="memory-key">' + escHtml(m.key) + '</div>'
-      + '<div class="memory-val">' + escHtml(m.value) + '</div>'
-      + '</div>'
-      + '<button class="memory-del" onclick="deleteMemory(\'' + m.id + '\')" title="删除">✕</button>'
-      + '</div>';
-  }).join('');
-}
-
-async function deleteMemory(id) {
-  try {
-    const res = await fetch('/api/memory/delete', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id })
-    });
-    const json = await res.json();
-    if (json.code === 0) {
-      showToast('已删除', 'success');
-      loadMemories();
-    }
-  } catch (e) { showToast('❌ ' + e.message, 'error'); }
-}
-
-function escHtml(s) {
-  const d = document.createElement('div');
-  d.textContent = s;
-  return d.innerHTML;
-}
-
-// ====== API ======
-async function load() {
-  try {
-    await Promise.all([loadPersona(), loadSkills(), loadMemories()]);
-    const [chanRes, llmRes] = await Promise.all([fetch('/api/channels'), fetch('/api/llm')]);
-    const chanJson = await chanRes.json();
-    const llmJson = await llmRes.json();
-    if (chanJson.code === 0 && chanJson.data) {
-      fields.forEach(f => {
-        const el = document.getElementById(f);
-        if (el && chanJson.data[f]) el.value = chanJson.data[f];
-      });
-    }
-    if (llmJson.code === 0 && llmJson.data) {
-      llmFields.forEach(f => {
-        const el = document.getElementById(f);
-        if (el && llmJson.data[f] !== undefined) el.value = llmJson.data[f] || '';
-      });
-    }
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('content').style.display = 'block';
-  } catch (e) {
-    document.getElementById('loading').textContent = t('load_failed');
-  }
-}
-
-async function save() {
-  const btn = document.getElementById('saveBtn');
+async function saveLLM() {
+  const btn = document.getElementById('llmSaveBtn');
   btn.disabled = true;
-  btn.textContent = t('saving');
+  btn.textContent = t('loading');
   try {
-    const chanBody = {};
-    fields.forEach(f => {
-      const el = document.getElementById(f);
-      if (el) chanBody[f] = el.value.trim();
-    });
-    const llmBody = {};
-    llmFields.forEach(f => {
-      const el = document.getElementById(f);
-      if (el) llmBody[f] = el.value.trim();
-    });
-    const [chanRes, llmRes] = await Promise.all([
-      fetch('/api/channels', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(chanBody) }),
-      fetch('/api/llm', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(llmBody) })
-    ]);
-    const chanJson = await chanRes.json();
-    const llmJson = await llmRes.json();
-    if (chanJson.code === 0 && llmJson.code === 0) {
-      showToast(t('save_success'), 'success');
-      setTimeout(load, 500);
+    const body = {
+      llmModelName: document.getElementById('llmModelName').value.trim(),
+      llmApiKey: document.getElementById('llmApiKey').value.trim(),
+      llmBaseUrl: document.getElementById('llmBaseUrl').value.trim(),
+      temperature: parseFloat(document.getElementById('llmTemperature').value)
+    };
+    const maxTokens = document.getElementById('llmMaxTokens').value.trim();
+    if (maxTokens) body.maxTokens = parseInt(maxTokens);
+    const extra = document.getElementById('llmExtraParams').value.trim();
+    if (extra) {
+      try { body.extraParams = JSON.parse(extra); } catch(e) { /* ignore */ }
+    }
+    const res = await apiPost('/api/llm', body);
+    if (res.code === 0) {
+      showToast(t('llm_saved'), 'success');
     } else {
-      const msg = chanJson.code !== 0 ? chanJson.message : llmJson.message;
-      showToast(t('save_failed') + ': ' + (msg || t('unknown_error')), 'error');
+      showToast(t('save_failed') + ': ' + (res.message || t('unknown_error')), 'error');
     }
   } catch (e) {
     showToast(t('save_failed') + ': ' + e.message, 'error');
   } finally {
     btn.disabled = false;
-    btn.textContent = t('save_btn');
+    btn.textContent = t('llm_save');
   }
 }
 
-function showToast(msg, type) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.className = 'toast ' + type;
-  requestAnimationFrame(() => { el.classList.add('show'); });
-  setTimeout(() => { el.classList.remove('show'); }, 2500);
-}
-
-// ====== Screen Preview ======
-function refreshScreen() {
-  document.getElementById('screenPreview').src = '/api/screenshot?t=' + Date.now();
-}
-let autoRefreshTimer = null;
-function toggleAutoRefresh() {
-  const chk = document.getElementById('autoRefresh');
-  if (chk.checked) {
-    autoRefreshTimer = setInterval(refreshScreen, 3000);
-  } else if (autoRefreshTimer) {
-    clearInterval(autoRefreshTimer);
-    autoRefreshTimer = null;
-  }
-}
-
-// ====== Config Backup & Restore ======
-async function exportConfig() {
+async function testLLM() {
+  const btn = document.getElementById('llmTestBtn');
+  btn.disabled = true;
+  btn.textContent = t('llm_testing');
   try {
-    const res = await fetch('/api/config/export');
-    const json = await res.json();
-    if (json.code === 0) {
-      const blob = new Blob([JSON.stringify(json.data, null, 2)], {type: 'application/json'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'cici-config-backup.json';
-      a.click();
-      URL.revokeObjectURL(a.href);
-      showToast('✅ 配置已导出', 'success');
+    const res = await apiPost('/api/llm/test', {
+      apiKey: document.getElementById('llmApiKey').value.trim(),
+      baseUrl: document.getElementById('llmBaseUrl').value.trim(),
+      model: document.getElementById('llmModelName').value.trim()
+    });
+    if (res.code === 0 && res.data && res.data.success) {
+      showToast(t('llm_test_ok'), 'success');
     } else {
-      showToast('❌ 导出失败: ' + (json.message || ''), 'error');
+      showToast(t('llm_test_fail') + ': ' + (res.message || t('unknown_error')), 'error');
     }
   } catch (e) {
-    showToast('❌ ' + e.message, 'error');
+    showToast(t('llm_test_fail') + ': ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = t('llm_test');
   }
 }
 
-async function importConfig(event) {
+// ====== CHANNELS ======
+const channelDefs = [
+  { id: 'dingtalk', nameKey: 'ch_dingtalk', color: '#3370FF', fields: [
+    { id: 'dingtalkAppKey', label: 'Client ID', phKey: 'ph_dingtalk_id', secret: false },
+    { id: 'dingtalkAppSecret', label: 'Client Secret', phKey: 'ph_dingtalk_secret', secret: true }
+  ]},
+  { id: 'feishu', nameKey: 'ch_feishu', color: '#00D6B9', fields: [
+    { id: 'feishuAppId', label: 'App ID', phKey: 'ph_feishu_id', secret: false },
+    { id: 'feishuAppSecret', label: 'App Secret', phKey: 'ph_feishu_secret', secret: true }
+  ]},
+  { id: 'qq', nameKey: 'ch_qq', color: '#12B7F5', fields: [
+    { id: 'qqAppId', label: 'App ID', phKey: 'ph_qq_id', secret: false },
+    { id: 'qqAppSecret', label: 'App Secret', phKey: 'ph_qq_secret', secret: true }
+  ]},
+  { id: 'discord', nameKey: 'ch_discord', color: '#5865F2', fields: [
+    { id: 'discordBotToken', label: 'Bot Token', phKey: 'ph_discord_token', secret: true }
+  ], tipKey: 'discord_tip' },
+  { id: 'telegram', nameKey: 'ch_telegram', color: '#26A5E4', fields: [
+    { id: 'telegramBotToken', label: 'Bot Token', phKey: 'ph_telegram_token', secret: true }
+  ], tipKey: 'telegram_tip' },
+  { id: 'wechat', nameKey: 'ch_wechat', color: '#07C160', fields: [
+    { id: 'wechatAppId', label: 'App ID', phKey: 'ph_wechat_id', secret: false },
+    { id: 'wechatAppSecret', label: 'App Secret', phKey: 'ph_wechat_secret', secret: true }
+  ]}
+];
+
+async function loadChannels() {
+  const grid = document.getElementById('channelGrid');
+  const res = await apiGet('/api/channels');
+  let data = {};
+  if (res.code === 0 && res.data) data = res.data;
+
+  grid.innerHTML = '';
+  channelDefs.forEach(ch => {
+    const configured = ch.fields.every(f => data[f.id] && data[f.id].trim() !== '');
+    const card = document.createElement('div');
+    card.className = 'channel-card';
+    card.innerHTML = `
+      <div class="channel-card-header" onclick="toggleCollapse('chBody_${ch.id}')">
+        <div class="ch-icon" style="background:${ch.color}20;color:${ch.color};font-weight:700">${ch.nameKey === 'ch_dingtalk' ? 'D' : ch.nameKey === 'ch_feishu' ? 'F' : ch.nameKey === 'ch_qq' ? 'Q' : ch.nameKey === 'ch_discord' ? 'Dc' : ch.nameKey === 'ch_telegram' ? 'Tg' : 'Wx'}</div>
+        <div class="ch-name">${t(ch.nameKey)}</div>
+        <div class="ch-status tag ${configured ? 'success' : ''}">${t(configured ? 'ch_configured' : 'ch_not_configured')}</div>
+        <svg class="collapse-arrow" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      </div>
+      <div class="channel-card-body" id="chBody_${ch.id}">
+        ${ch.fields.map(f => `
+          <div class="field-group">
+            <label class="field-label">${f.label}</label>
+            <div class="${f.secret ? 'input-wrap' : ''}">
+              <input type="${f.secret ? 'password' : 'text'}" id="${f.id}" ${f.secret ? 'autocomplete="off"' : ''} placeholder="${t(f.phKey)}" value="${(data[f.id] || '')}">
+              ${f.secret ? `<button class="toggle-eye" onclick="togglePassword('${f.id}',this)" title="${t('toggle_visibility')}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg></button>` : ''}
+            </div>
+          </div>
+        `).join('')}
+        ${ch.tipKey ? `<p class="field-hint">${t(ch.tipKey)}</p>` : ''}
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+async function saveChannels() {
+  const btn = document.getElementById('chSaveBtn');
+  btn.disabled = true;
+  btn.textContent = t('loading');
+  try {
+    const body = {};
+    channelDefs.forEach(ch => {
+      ch.fields.forEach(f => {
+        const el = document.getElementById(f.id);
+        if (el) body[f.id] = el.value.trim();
+      });
+    });
+    const res = await apiPost('/api/channels', body);
+    if (res.code === 0) {
+      showToast(t('ch_saved'), 'success');
+      loadChannels();
+    } else {
+      showToast(t('save_failed') + ': ' + (res.message || t('unknown_error')), 'error');
+    }
+  } catch (e) {
+    showToast(t('save_failed') + ': ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = t('ch_save');
+  }
+}
+
+// ====== SKILLS ======
+async function loadSkills() {
+  loadInstalledSkills();
+  loadMarketSkills();
+}
+async function loadInstalledSkills() {
+  const container = document.getElementById('installedSkillsList');
+  const loading = document.getElementById('installedSkillsLoading');
+  loading.style.display = '';
+  container.innerHTML = '';
+  const res = await apiGet('/api/skills');
+  loading.style.display = 'none';
+  if (res.code === 0 && Array.isArray(res.data) && res.data.length > 0) {
+    container.innerHTML = res.data.map(sk => `
+      <div class="skill-card">
+        <div class="skill-icon">${(sk.icon || '🧩')}</div>
+        <div class="skill-body">
+          <div class="skill-name">${sk.displayName || sk.name}</div>
+          <div class="skill-desc">${sk.description || ''}</div>
+          <div class="skill-tags">
+            ${(sk.tags || []).map(tg => `<span class="tag accent">${tg}</span>`).join('')}
+            ${(sk.triggers || []).map(tr => `<span class="tag">${t('sk_triggers')}: ${tr}</span>`).join('')}
+          </div>
+        </div>
+        <div class="skill-actions">
+          <label class="toggle-switch skill-toggle">
+            <input type="checkbox" ${sk.enabled !== false ? 'checked' : ''} onchange="toggleSkill('${sk.name}', this.checked)">
+            <span class="toggle-slider"></span>
+          </label>
+          <button class="btn btn-ghost btn-sm" onclick="showToast('Edit: ${sk.name}','info')">${t('sk_edit')}</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="confirmDeleteSkill('${sk.name}')">${t('sk_delete')}</button>
+        </div>
+      </div>
+    `).join('');
+  } else {
+    container.innerHTML = '<div class="text-center text-tertiary" style="padding:32px 0">' + t('sk_no_installed') + '</div>';
+  }
+}
+async function loadMarketSkills() {
+  const container = document.getElementById('marketSkillsList');
+  const loading = document.getElementById('marketSkillsLoading');
+  loading.style.display = '';
+  container.innerHTML = '';
+  const res = await apiGet('/api/skills/builtin');
+  loading.style.display = 'none';
+  if (res.code === 0 && Array.isArray(res.data) && res.data.length > 0) {
+    container.innerHTML = res.data.map(sk => `
+      <div class="skill-card">
+        <div class="skill-icon">${(sk.icon || '📦')}</div>
+        <div class="skill-body">
+          <div class="skill-name">${sk.displayName || sk.name}</div>
+          <div class="skill-desc">${sk.description || ''}</div>
+          <div class="skill-tags">
+            ${(sk.tags || []).map(tg => `<span class="tag accent">${tg}</span>`).join('')}
+          </div>
+        </div>
+        <div class="skill-actions">
+          <button class="btn btn-primary btn-sm" onclick="installSkill('${sk.name}')">${t('sk_install')}</button>
+        </div>
+      </div>
+    `).join('');
+  } else {
+    container.innerHTML = '<div class="text-center text-tertiary" style="padding:32px 0">' + t('sk_no_market') + '</div>';
+  }
+}
+async function toggleSkill(name, enabled) {
+  const res = await apiPost('/api/skills/toggle', { name, enabled });
+  if (res.code === 0) showToast(t('sk_toggle_ok'), 'success');
+  else showToast(t('error') + ': ' + (res.message || ''), 'error');
+}
+async function installSkill(name) {
+  const res = await apiPost('/api/skills/install', { name });
+  if (res.code === 0) {
+    showToast(t('sk_install_ok'), 'success');
+    loadInstalledSkills();
+  } else {
+    showToast(t('error') + ': ' + (res.message || ''), 'error');
+  }
+}
+function confirmDeleteSkill(name) {
+  showModal(t('sk_delete'), t('sk_delete_confirm'), async () => {
+    const res = await apiPost('/api/skills/delete', { name });
+    if (res.code === 0) {
+      showToast(t('sk_delete_ok'), 'success');
+      loadInstalledSkills();
+    } else {
+      showToast(t('error') + ': ' + (res.message || ''), 'error');
+    }
+  });
+}
+
+// Skills tab switching
+document.querySelectorAll('#skillsTabBar .tab-item').forEach(tab => {
+  tab.addEventListener('click', function() {
+    document.querySelectorAll('#skillsTabBar .tab-item').forEach(t => t.classList.remove('active'));
+    this.classList.add('active');
+    const tabName = this.dataset.tab;
+    document.getElementById('skillsInstalled').style.display = tabName === 'installed' ? '' : 'none';
+    document.getElementById('skillsMarket').style.display = tabName === 'market' ? '' : 'none';
+  });
+});
+
+// ====== PERSONA ======
+const personaDefs = [
+  { id: 'geek', nameKey: 'per_geek', descKey: 'per_geek_desc', sceneKey: 'per_geek_scene', emoji: '🤖' },
+  { id: 'office', nameKey: 'per_office', descKey: 'per_office_desc', sceneKey: 'per_office_scene', emoji: '💼' },
+  { id: 'creative', nameKey: 'per_creative', descKey: 'per_creative_desc', sceneKey: 'per_creative_scene', emoji: '🎨' },
+  { id: 'efficient', nameKey: 'per_efficient', descKey: 'per_efficient_desc', sceneKey: 'per_efficient_scene', emoji: '⚡' }
+];
+
+async function loadPersona() {
+  const grid = document.getElementById('personaGrid');
+  const res = await apiGet('/api/persona');
+  let currentPersona = 'geek';
+  if (res.code === 0 && res.data) {
+    currentPersona = res.data.currentPersona || res.data.persona || res.data.name || 'geek';
+  }
+  const pMap = {};
+  personaDefs.forEach(p => { pMap[p.id] = p; });
+
+  grid.innerHTML = personaDefs.map(p => `
+    <div class="persona-card ${p.id === currentPersona ? 'active' : ''}" onclick="switchPersona('${p.id}')">
+      <div class="persona-emoji">${p.emoji}</div>
+      <div class="persona-name">${t(p.nameKey)}</div>
+      <div class="persona-desc">${t(p.descKey)}</div>
+      <div class="persona-scene">${t(p.sceneKey)}</div>
+      <div class="persona-check">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        ${t('per_activate')}
+      </div>
+    </div>
+  `).join('');
+}
+
+async function switchPersona(id) {
+  const res = await apiPost('/api/persona', { persona: id });
+  if (res.code === 0) {
+    showToast(t('per_switched') + ' ' + t(personaDefs.find(p => p.id === id).nameKey), 'success');
+    loadPersona();
+    // Update dashboard persona
+    document.getElementById('dashPersona').textContent = t(personaDefs.find(p => p.id === id).nameKey);
+  } else {
+    showToast(t('error') + ': ' + (res.message || ''), 'error');
+  }
+}
+
+// ====== MEMORY ======
+let memoryFilter = '';
+async function loadMemory() {
+  const container = document.getElementById('memoryList');
+  const search = document.getElementById('memorySearch').value.trim();
+  container.innerHTML = '<div class="loading-state"><div class="spinner"></div><div>' + t('loading') + '</div></div>';
+
+  const res = await apiGet('/api/memory');
+  container.innerHTML = '';
+  if (res.code === 0 && Array.isArray(res.data)) {
+    let items = res.data;
+    // Apply category filter
+    if (memoryFilter) items = items.filter(item => (item.category || item.type || '') === memoryFilter);
+    // Apply search filter
+    if (search) {
+      const q = search.toLowerCase();
+      items = items.filter(item =>
+        (item.key || '').toLowerCase().includes(q) ||
+        (item.value || '').toLowerCase().includes(q)
+      );
+    }
+    if (items.length === 0) {
+      container.innerHTML = '<div class="memory-empty">' + (search || memoryFilter ? t('mem_no_results') : t('mem_empty')) + '</div>';
+      return;
+    }
+    const list = document.createElement('ul');
+    list.className = 'memory-list';
+    items.forEach(item => {
+      const li = document.createElement('li');
+      li.className = 'memory-item';
+      const category = item.category || item.type || 'user_info';
+      li.innerHTML = `
+        <div style="flex:1;min-width:0">
+          <div class="memory-key">${escapeHtml(item.key || '')}</div>
+          <div class="memory-value">${escapeHtml(typeof item.value === 'string' ? item.value : JSON.stringify(item.value))}</div>
+          <div class="memory-meta">
+            <span class="tag accent">${category}</span>
+            ${item.time ? `<span class="text-xs text-tertiary">${item.time}</span>` : ''}
+            ${item.updatedAt ? `<span class="text-xs text-tertiary">${item.updatedAt}</span>` : ''}
+          </div>
+        </div>
+        <button class="memory-del" onclick="confirmDeleteMemory('${escapeHtml(item.key || '')}')" title="${t('mem_delete')}">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+        </button>
+      `;
+      list.appendChild(li);
+    });
+    container.appendChild(list);
+  } else {
+    container.innerHTML = '<div class="memory-empty">' + t('mem_empty') + '</div>';
+  }
+}
+
+function escapeHtml(str) {
+  if (typeof str !== 'string') return String(str);
+  return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+function confirmDeleteMemory(key) {
+  showModal(t('mem_delete'), t('mem_delete_confirm'), async () => {
+    const res = await apiDelete('/api/memory?key=' + encodeURIComponent(key));
+    if (res.code === 0) {
+      showToast(t('mem_deleted'), 'success');
+      loadMemory();
+    } else {
+      showToast(t('error') + ': ' + (res.message || ''), 'error');
+    }
+  });
+}
+
+// Memory filter chips
+document.querySelectorAll('#memoryFilter .filter-chip').forEach(chip => {
+  chip.addEventListener('click', function() {
+    document.querySelectorAll('#memoryFilter .filter-chip').forEach(c => c.classList.remove('active'));
+    this.classList.add('active');
+    memoryFilter = this.dataset.filter;
+    loadMemory();
+  });
+});
+
+// ====== SETTINGS ======
+async function loadSettings() {
+  // Try to load current settings from API or localStorage
+  try {
+    // Load settings from localStorage as fallback
+    const saved = localStorage.getItem('cici_settings');
+    if (saved) {
+      const s = JSON.parse(saved);
+      if (s.backend) document.getElementById('setBackend').value = s.backend;
+      if (s.adbPath) document.getElementById('setAdbPath').value = s.adbPath;
+      if (s.hermesHost) document.getElementById('setHermesHost').value = s.hermesHost;
+      if (s.hermesPort) document.getElementById('setHermesPort').value = s.hermesPort;
+      if (s.maxTaps) document.getElementById('setMaxTaps').value = s.maxTaps;
+      if (s.maxSteps) document.getElementById('setMaxSteps').value = s.maxSteps;
+      if (s.maxExecTime) document.getElementById('setMaxExecTime').value = s.maxExecTime;
+    }
+  } catch(e) {}
+}
+
+function saveSettingsToLocal() {
+  const s = {
+    backend: document.getElementById('setBackend').value,
+    adbPath: document.getElementById('setAdbPath').value.trim(),
+    hermesHost: document.getElementById('setHermesHost').value.trim(),
+    hermesPort: document.getElementById('setHermesPort').value.trim(),
+    maxTaps: document.getElementById('setMaxTaps').value.trim(),
+    maxSteps: document.getElementById('setMaxSteps').value.trim(),
+    maxExecTime: document.getElementById('setMaxExecTime').value.trim()
+  };
+  try {
+    localStorage.setItem('cici_settings', JSON.stringify(s));
+  } catch(e) {}
+}
+
+// Auto-save settings on change
+document.querySelectorAll('#page-settings input, #page-settings select').forEach(el => {
+  el.addEventListener('change', saveSettingsToLocal);
+  el.addEventListener('input', saveSettingsToLocal);
+});
+
+function exportConfig() {
+  saveSettingsToLocal();
+  const s = localStorage.getItem('cici_settings') || '{}';
+  const blob = new Blob([s], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'cici-config-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(t('set_export_ok'), 'success');
+}
+
+function importConfig(event) {
   const file = event.target.files[0];
   if (!file) return;
-  try {
-    const text = await file.text();
-    const parsed = JSON.parse(text);
-    const res = await fetch('/api/config/import', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({data: parsed})
-    });
-    const json = await res.json();
-    if (json.code === 0) {
-      showToast('✅ 配置已恢复，请刷新页面', 'success');
-      setTimeout(() => location.reload(), 1500);
-    } else {
-      showToast('❌ 导入失败: ' + (json.message || ''), 'error');
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const s = JSON.parse(e.target.result);
+      localStorage.setItem('cici_settings', JSON.stringify(s));
+      loadSettings();
+      showToast(t('set_import_ok'), 'success');
+    } catch(err) {
+      showToast(t('set_import_fail'), 'error');
     }
-  } catch (e) {
-    showToast('❌ ' + e.message, 'error');
-  }
+  };
+  reader.readAsText(file);
   event.target.value = '';
 }
 
-load();
+function confirmRestart() {
+  showModal(t('set_restart'), t('set_restart_confirm'), () => {
+    showToast(t('set_restarting'), 'info');
+    apiPost('/api/restart', {}).then(res => {
+      if (res.code === 0) showToast(t('success'), 'success');
+    });
+  });
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init() {
+  currentLang = detectLang();
+
+  // Theme
+  applyTheme();
+  document.querySelectorAll('.theme-toggle').forEach(el => el.addEventListener('click', toggleTheme));
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+
+  // Lang
+  document.querySelectorAll('.lang-toggle').forEach(el => {
+    el.textContent = currentLang === 'zh' ? 'EN' : '中';
+    el.addEventListener('click', toggleLang);
+  });
+
+  applyI18n();
+
+  // Initial route
+  handleHashChange();
+}
+
+// Start
+init();
 </script>
 </body>
 </html>

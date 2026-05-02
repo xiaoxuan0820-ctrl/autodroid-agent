@@ -24,6 +24,29 @@ object MemoryManager {
     private val GSON = Gson()
     private const val STORAGE_KEY = "cici_memory_store"
 
+    /** 最大记忆条数，超过时淘汰最低分记忆 */
+    private const val MAX_MEMORIES = 500
+
+    /** 构建上下文时取 Top-K 记忆 */
+    private const val TOP_K_MEMORIES = 20
+
+    // ==================== 同义词表 ====================
+
+    private val SYNONYM_MAP = mapOf(
+        "老板" to listOf("经理", "上司", "boss"),
+        "地址" to listOf("位置", "地点"),
+        "天气" to listOf("下雨", "温度", "气候"),
+        "电话" to listOf("手机", "号码", "联系方式"),
+        "邮件" to listOf("邮箱", "email"),
+        "密码" to listOf("口令", "密钥"),
+        "账号" to listOf("账户", "用户名"),
+        "设置" to listOf("配置", "设定"),
+        "名称" to listOf("名字", "姓名"),
+        "备注" to listOf("注释", "说明", "附注"),
+        "提醒" to listOf("提醒", "通知", "提示"),
+        "打卡" to listOf("签到", "考勤")
+    )
+
     // ==================== 分类 ====================
 
     enum class Category(val key: String, val label: String, val autoInject: Boolean) {
@@ -46,7 +69,11 @@ object MemoryManager {
         /** 标签，便于搜索 */
         val tags: List<String> = emptyList(),
         val createdAt: Long = System.currentTimeMillis(),
-        val updatedAt: Long = System.currentTimeMillis()
+        val updatedAt: Long = System.currentTimeMillis(),
+        /** 上次访问时间，用于评分 */
+        val lastAccessAt: Long = System.currentTimeMillis(),
+        /** 重要性（0.0 ~ 1.0），默认 0.5 */
+        val importance: Float = 0.5f
     )
 
     // ==================== 缓存 ====================
@@ -68,8 +95,42 @@ object MemoryManager {
     }
 
     private fun saveAll(items: List<MemoryItem>) {
-        cache = items
-        KVUtils.putString(STORAGE_KEY, GSON.toJson(items))
+        // 检查并淘汰最低分记忆
+        val trimmed = if (items.size > MAX_MEMORIES) {
+            val scored = items.map { item ->
+                val daysSinceAccess = (System.currentTimeMillis() - item.lastAccessAt) / (1000L * 60 * 60 * 24)
+                val score = item.importance * (1.0f - (daysSinceAccess.coerceAtMost(90) / 90.0f))
+                item to score
+            }
+            val sorted = scored.sortedByDescending { it.second }
+            sorted.take(MAX_MEMORIES).map { it.first }
+        } else {
+            items
+        }
+        cache = trimmed
+        KVUtils.putString(STORAGE_KEY, GSON.toJson(trimmed))
+    }
+
+    // ==================== 查询扩展 ====================
+
+    /**
+     * 对查询关键词做同义扩展，返回扩展后的关键词列表（包含原词）。
+     */
+    private fun expandQuery(query: String): List<String> {
+        val results = mutableSetOf(query)
+        // 检查 query 是否匹配同义词表中的任意 key 或 value
+        for ((key, synonyms) in SYNONYM_MAP) {
+            if (query.contains(key, ignoreCase = true)) {
+                results.addAll(synonyms)
+            }
+            for (syn in synonyms) {
+                if (query.contains(syn, ignoreCase = true)) {
+                    results.add(key)
+                    break
+                }
+            }
+        }
+        return results.toList()
     }
 
     // ==================== 增删改 ====================
@@ -80,21 +141,23 @@ object MemoryManager {
         key: String,
         value: String,
         appName: String? = null,
-        tags: List<String> = emptyList()
+        tags: List<String> = emptyList(),
+        importance: Float = 0.5f
     ): MemoryItem {
         val items = loadAll().toMutableList()
 
         // 查找是否已存在相同 key+appName
         val existing = items.indexOfFirst { it.key == key && it.appName == appName && it.category == category }
         val item = if (existing >= 0) {
-            items[existing].copy(value = value, tags = tags, updatedAt = System.currentTimeMillis())
+            items[existing].copy(value = value, tags = tags, updatedAt = System.currentTimeMillis(), importance = importance)
         } else {
             MemoryItem(
                 category = category,
                 key = key,
                 value = value,
                 appName = appName,
-                tags = tags
+                tags = tags,
+                importance = importance
             )
         }
 
@@ -138,12 +201,22 @@ object MemoryManager {
         val items = loadAll()
         if (query.isNullOrBlank()) return items.take(limit)
 
+        // 同义词扩展
         val q = query.lowercase()
-        return items.filter {
-            it.key.lowercase().contains(q) ||
-            it.value.lowercase().contains(q) ||
-            it.tags.any { tag -> tag.lowercase().contains(q) } ||
-            it.appName?.lowercase()?.contains(q) == true
+        val expandedQueries = expandQuery(q)
+
+        return items.filter { item ->
+            val keyLower = item.key.lowercase()
+            val valueLower = item.value.lowercase()
+            val appLower = item.appName?.lowercase() ?: ""
+            val tagLower = item.tags.joinToString(" ").lowercase()
+
+            expandedQueries.any { expanded ->
+                keyLower.contains(expanded) ||
+                valueLower.contains(expanded) ||
+                tagLower.contains(expanded) ||
+                appLower.contains(expanded)
+            }
         }.take(limit)
     }
 
@@ -162,7 +235,8 @@ object MemoryManager {
      * - 跟当前应用相关的记忆注入
      * - 跟任务描述关键词匹配的记忆注入
      * - CREDENTIAL 类型不自动注入
-     * - 总长度限制在 1500 字符以内
+     * - 按评分排序取 Top-20（importance × 时效衰减）
+     * - 每次读取时更新 lastAccessAt
      */
     fun buildMemoryContext(currentApp: String?, taskPrompt: String): String {
         val all = loadAll()
@@ -190,8 +264,32 @@ object MemoryManager {
 
         if (relevant.isEmpty()) return ""
 
+        // 评分排序：importance × (1 - daysSinceLastAccess / 90)
+        val now = System.currentTimeMillis()
+        val scored = relevant.map { item ->
+            val daysSinceAccess = (now - item.lastAccessAt) / (1000L * 60 * 60 * 24)
+            val score = item.importance * (1.0f - (daysSinceAccess.coerceAtMost(90) / 90.0f))
+            item to score
+        }
+        val topItems = scored.sortedByDescending { it.second }.take(TOP_K_MEMORIES).map { it.first }
+
+        // 更新被选中记忆的 lastAccessAt
+        val allItems = loadAll().toMutableList()
+        var changed = false
+        for (selected in topItems) {
+            val idx = allItems.indexOfFirst { it.id == selected.id }
+            if (idx >= 0) {
+                allItems[idx] = allItems[idx].copy(lastAccessAt = now)
+                changed = true
+            }
+        }
+        if (changed) {
+            cache = allItems
+            KVUtils.putString(STORAGE_KEY, GSON.toJson(allItems))
+        }
+
         // 按分类分组，格式化输出
-        val grouped = relevant.groupBy { it.category }
+        val grouped = topItems.groupBy { it.category }
         val sb = StringBuilder("\n\n## 记忆上下文\n")
 
         for ((category, items) in grouped) {
@@ -202,9 +300,7 @@ object MemoryManager {
             }
         }
 
-        // 限制长度
-        val result = sb.toString()
-        return if (result.length > 1500) result.take(1500) + "\n...(更多记忆未显示)" else result
+        return sb.toString()
     }
 
     /** 清空所有记忆 */

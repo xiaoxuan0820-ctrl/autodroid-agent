@@ -75,6 +75,8 @@ object ToolRegistry {
         register(LongPressTool())
         register(SwipeTool())
         register(ScrollToFindTool())
+        register(FindAndTapTool())
+        register(TapIfExistsTool())
     }
 
     fun register(tool: BaseTool) {

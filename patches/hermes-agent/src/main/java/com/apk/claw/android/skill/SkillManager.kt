@@ -1,5 +1,6 @@
 package com.apk.claw.android.skill
 
+import com.apk.claw.android.memory.MemoryManager
 import com.apk.claw.android.scheduler.TaskScheduler
 import com.apk.claw.android.utils.KVUtils
 import com.apk.claw.android.utils.XLog
@@ -59,6 +60,8 @@ object SkillManager {
         val steps: List<SkillStep> = emptyList(), // 执行步骤（可选）
         val systemPrompt: String = "",          // 自定义 system prompt 后缀
         val tags: List<String> = emptyList(),
+        /** 执行此技能需要的记忆上下文关键词，自动从 MemoryManager 获取相关记忆 */
+        val requiredMemories: List<String> = emptyList(),
         val createdAt: Long = System.currentTimeMillis(),
         val updatedAt: Long = System.currentTimeMillis(),
         val enabled: Boolean = true
@@ -222,7 +225,7 @@ object SkillManager {
 
     /**
      * 构建技能执行时的 system prompt
-     * 包含技能的基本信息 + 执行步骤
+     * 包含技能的基本信息 + 执行步骤 + 相关记忆上下文
      */
     fun buildSkillPrompt(skill: Skill): String {
         val sb = StringBuilder()
@@ -240,6 +243,19 @@ object SkillManager {
         if (skill.systemPrompt.isNotBlank()) {
             sb.appendLine("\n额外要求:")
             sb.appendLine(skill.systemPrompt)
+        }
+
+        // 追加相关记忆上下文
+        if (skill.requiredMemories.isNotEmpty()) {
+            val memoryQuery = skill.requiredMemories.joinToString(" ")
+            val memories = MemoryManager.search(memoryQuery, 10)
+            if (memories.isNotEmpty()) {
+                sb.appendLine("\n## 技能相关记忆")
+                memories.forEach { mem ->
+                    val scope = if (mem.appName != null) "[${mem.appName}] " else ""
+                    sb.appendLine("- $scope${mem.key}: ${mem.value}")
+                }
+            }
         }
 
         return sb.toString()

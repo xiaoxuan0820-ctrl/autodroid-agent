@@ -22,11 +22,17 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import dev.langchain4j.data.message.AiMessage
 import dev.langchain4j.data.message.ChatMessage
+import dev.langchain4j.data.message.Content
+import dev.langchain4j.data.message.ImageContent
 import dev.langchain4j.data.message.SystemMessage
+import dev.langchain4j.data.message.TextContent
 import dev.langchain4j.data.message.ToolExecutionResultMessage
 import dev.langchain4j.data.message.UserMessage
 import dev.langchain4j.agent.tool.ToolExecutionRequest
+import android.graphics.Bitmap
+import java.io.ByteArrayOutputStream
 import java.io.File
+import java.util.Base64
 import java.util.LinkedList
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -331,6 +337,118 @@ class DefaultAgentService : AgentService {
         }
     }
 
+    // ==================== 截图辅助（视觉输入 & 死循环自救） ====================
+
+    /** 截图任务名称 */
+    private val SCREENSHOT_TOOL = "take_screenshot"
+
+    /**
+     * 截图并转为 Base64 JPEG（50% quality），返回 data URI 格式字符串。
+     * 失败时返回 null。
+     */
+    private fun captureScreenshotAsBase64(): String? {
+        return try {
+            val service = ClawAccessibilityService.getInstance() ?: return null
+            val bitmap = service.takeScreenshot(5000) ?: return null
+            val outputStream = ByteArrayOutputStream()
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 50, outputStream)
+            val byteArray = outputStream.toByteArray()
+            bitmap.recycle()
+            val base64 = Base64.getEncoder().encodeToString(byteArray)
+            "data:image/jpeg;base64,$base64"
+        } catch (e: Exception) {
+            XLog.w(TAG, "截图转 Base64 失败: ${e.message}")
+            null
+        }
+    }
+
+    /**
+     * 在 LLM 调用前附加截图视觉信息到最新的 UserMessage。
+     * 将最新的 UserMessage 替换为包含文本 + 图片的复合消息。
+     */
+    private fun attachScreenshotToUserMessage(messages: MutableList<ChatMessage>) {
+        val base64Uri = captureScreenshotAsBase64() ?: return
+
+        // 找到最后一个 UserMessage 替换
+        val lastUserIdx = messages.indexOfLast { it is UserMessage }
+        if (lastUserIdx < 0) return
+
+        val originalUserMessage = messages[lastUserIdx] as UserMessage
+        val originalText = originalUserMessage.singleText() ?: ""
+
+        // 构建包含文本和图片的新 UserMessage
+        val contents = mutableListOf<Content>()
+        contents.add(TextContent(originalText))
+        try {
+            contents.add(ImageContent(base64Uri))
+        } catch (e: Exception) {
+            // 如果 ImageContent 构造失败，保持原样
+            XLog.w(TAG, "添加 ImageContent 失败: ${e.message}")
+            return
+        }
+        messages[lastUserIdx] = UserMessage(contents)
+        XLog.d(TAG, "已附加截图视觉信息到 UserMessage")
+    }
+
+    // ==================== 死循环自救机制 ====================
+
+    /** 工具调用历史，每轮记录 toolName + 参数摘要 */
+    private data class ToolCallSnapshot(
+        val toolName: String,
+        val argsSummary: String
+    )
+
+    /** 连续相同调用的最大次数（触发截图自救） */
+    private val MAX_CONSECUTIVE_IDENTICAL = 5
+
+    /** 自救阶段最多轮数（3 轮 * 5 次 = 15 次连续相同） */
+    private val MAX_RESCUE_ROUNDS = 3
+
+    /**
+     * 检查工具调用是否陷入死循环（同一工具+相同参数连续重复）。
+     * 返回自救计数（0 = 正常，1-3 = 第几次自救，-1 = 需要强制终止）。
+     */
+    private data class LoopCheckResult(
+        val isStuck: Boolean,
+        val consecutiveCount: Int,
+        val shouldTerminate: Boolean
+    )
+
+    private fun checkToolLoop(
+        history: MutableList<ToolCallSnapshot>,
+        toolName: String,
+        argsSummary: String
+    ): LoopCheckResult {
+        history.add(ToolCallSnapshot(toolName, argsSummary))
+
+        // 计算最后连续相同调用的次数
+        var consecutiveCount = 0
+        for (i in history.indices.reversed()) {
+            val entry = history[i]
+            if (entry.toolName == toolName && entry.argsSummary == argsSummary) {
+                consecutiveCount++
+            } else {
+                break
+            }
+        }
+
+        if (consecutiveCount >= MAX_CONSECUTIVE_IDENTICAL * MAX_RESCUE_ROUNDS) {
+            return LoopCheckResult(true, consecutiveCount, true)
+        }
+
+        if (consecutiveCount >= MAX_CONSECUTIVE_IDENTICAL) {
+            return LoopCheckResult(true, consecutiveCount, false)
+        }
+
+        // 不在死循环状态时，清理太旧的历史（只保留最近 20 条）
+        if (history.size > 20) {
+            val toRemove = history.size - 20
+            repeat(toRemove) { history.removeFirstOrNull() }
+        }
+
+        return LoopCheckResult(false, consecutiveCount, false)
+    }
+
     // ==================== 主执行循环 ====================
 
     private fun runAgentLoop(userPrompt: String, callback: AgentCallback) {
@@ -361,10 +479,17 @@ class DefaultAgentService : AgentService {
         val maxIterations = config.maxIterations
         val loopHistory = LinkedList<RoundFingerprint>()
         var lastScreenHash = 0
+        // 死循环自救：记录每轮的工具名称+参数摘要
+        val toolCallHistory = mutableListOf<ToolCallSnapshot>()
+        var rescueStage = 0  // 0=正常, 1-3=第几次自救
+        var lastRescueIteration = 0
 
         while (iterations < maxIterations && !cancelled.get()) {
             iterations++
             callback.onLoopStart(iterations)
+
+            // [视觉输入] 在 LLM 调用前附加截图（每轮一次）
+            attachScreenshotToUserMessage(messages)
 
             // 发送前分级压缩历史消息，节省 token
             compressHistoryForSend(messages)
@@ -489,7 +614,7 @@ class DefaultAgentService : AgentService {
                     if (pdcaResult.isSuccess && pdcaResult.data != null) {
                         lastScreenHash = pdcaResult.data.hashCode()
                         messages.add(ToolExecutionResultMessage.from("pdca", "verify_screenshot",
-                            "[PDCA验证] 本轮执行后的屏幕状态:\n${pdcaResult.data.take(500)}"))
+                            "[PDCA验证] 本轮执行后的屏幕状态:\n${pdcaResult.data.take(3000)}"))
                         XLog.d(TAG, "PDCA: post-round screenshot captured")
                     }
                 } catch (e: Exception) {
@@ -497,17 +622,40 @@ class DefaultAgentService : AgentService {
                 }
             }
 
-            // 死循环检测
-            if (isStuckInLoop(loopHistory)) {
-                XLog.w(TAG, "Dead loop detected at iteration $iterations")
-                messages.add(
-                    UserMessage.from(
-                        "[系统提示] 检测到你连续多轮执行了相同的操作且屏幕没有变化，你可能陷入了死循环。" +
-                        "请尝试完全不同的方法：按 system_key(key=\"back\") 回退、滑动页面寻找目标、或重新打开 App。" +
-                        "如果确实无法完成任务，请调用 finish 说明原因。"
-                    )
-                )
-                loopHistory.clear()
+            // ==================== 死循环自救机制 ====================
+            // 在工具执行完毕后，对最后一个工具执行死循环检查
+            val lastToolRequest = llmResponse.toolExecutionRequests.lastOrNull()
+            if (lastToolRequest != null && lastToolRequest.name() !in listOf("get_screen_info", "take_screenshot", "find_node_info")) {
+                val lastToolName = lastToolRequest.name() ?: ""
+                val lastArgs = lastToolRequest.arguments() ?: "{}"
+                val loopResult = checkToolLoop(toolCallHistory, lastToolName, lastArgs)
+
+                if (loopResult.shouldTerminate) {
+                    XLog.w(TAG, "死循环自救失败，强制终止任务: $lastToolName 已连续重复 ${loopResult.consecutiveCount} 次")
+                    val errMsg = "任务因死循环强制终止：工具「$lastToolName」已连续重复 ${loopResult.consecutiveCount} 次，自救失败。"
+                    callback.onError(iterations, RuntimeException(errMsg), totalTokens)
+                    return
+                }
+
+                if (loopResult.isStuck && iterations != lastRescueIteration) {
+                    rescueStage++
+                    lastRescueIteration = iterations
+                    XLog.w(TAG, "检测到疑似死循环（自救第 ${rescueStage}/${MAX_RESCUE_ROUNDS} 轮）: $lastToolName 已重复 ${loopResult.consecutiveCount} 次")
+
+                    // 自动截图并附加视觉信息
+                    val rescueScreenshot = captureScreenshotAsBase64()
+                    val rescueContents = mutableListOf<Content>()
+                    rescueContents.add(TextContent("⚠️ 检测到可能死循环：$lastToolName 已重复 ${loopResult.consecutiveCount} 次。请分析截图寻找新方案。"))
+                    if (rescueScreenshot != null) {
+                        try {
+                            rescueContents.add(ImageContent(rescueScreenshot))
+                        } catch (e: Exception) {
+                            XLog.w(TAG, "自救截图添加 ImageContent 失败: ${e.message}")
+                        }
+                    }
+                    messages.add(UserMessage(rescueContents))
+                    XLog.i(TAG, "死循环自救第${rescueStage}轮：已注入截图和提示")
+                }
             }
             XLog.d(TAG, "轮数:$iterations all=$totalTokens 本轮=${llmResponse.tokenUsage?.totalTokenCount()}")
         }
